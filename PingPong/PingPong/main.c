@@ -40,10 +40,26 @@ unsigned char USART_Receive( void )
 } 
 //Maybe implement if else to return only the thing in the register
 
+int uart_putchar(char c, FILE *stream) {
+	if (c == '\n') {
+		USART_Transmit('\r');  // Send carriage return before newline
+	}
+	USART_Transmit(c);
+	return 0;
+}
+
+// Custom receive function (optional, for scanf or similar)
+int uart_getchar(FILE *stream) {
+	return USART_Receive();
+}
 
 int main(void)
 {	
 	USART_Init(MYUBRR);
+
+	fdevopen(uart_putchar, uart_getchar); //kan trenge referanse til funksjonen
+
+	printf("UART initialized!\n");
 	while(1) {
 		char r = USART_Receive();
 		if (r) {
