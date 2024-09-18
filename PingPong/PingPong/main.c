@@ -14,6 +14,7 @@
 
 #define BASE_ADDRESS 0x1000
 #define SRAM_OFFSET 0x0800
+#define ADC_OFFSET 0x0400
 
 void SRAM_test(void)
 {
@@ -97,11 +98,19 @@ void printf_init() {
 	fdevopen(uart_putchar, uart_getchar); //kan trenge referanse til funksjonen
 }
 void xmem_init() {
+	//SRAM
 	MCUCR |= 1 << SRE; // enable external memory interface
 	SFIOR &= ~(1 << XMM1 | 1 << XMM0); //setting XMM1 and XMM0 to 0 Worked with XMM2 instead of XMM0
 	SFIOR |= 1 << XMM2; // masking out the bits that JTAG uses Set other ones to 0
+	
+	// ADC
+	DDRD = 1 << DDD4; // set PD4 as PWM clock signal
+	TCCR3A |=  1 << WGM30 | 0 << WGM31 | 0 << COM3A0 | 1 << COM3A1;
+	TCCR3B |= 1 << WGM32 | 0 << ICES3 | 1 << CS30;
+	
 	//EMCUCR = 0 << SRW10 | 0 << SRW11;
 	
+
 }
 
 void xmem_write ( uint8_t data , uint16_t addr ) {
@@ -115,6 +124,98 @@ uint8_t xmem_read ( uint16_t addr ) {
 	return ret_val ;
 }
 
+typedef enum {
+	LEFT = 0,
+	RIGHT = 1,
+	UP = 2,
+	DOWN = 3,
+	NEUTRAL = 4
+} JOYSTICKPOS;
+
+typedef struct {
+	volatile int16_t X_joystick; 
+	volatile int16_t Y_joystick;
+	volatile int16_t L_slider; 
+	volatile int16_t R_slider;
+	} joystickAndSliderPos;
+
+typedef struct {
+	volatile int16_t X;
+	volatile int16_t Y;
+	} signedPos;
+	
+typedef struct {
+	volatile int16_t L;
+	volatile int16_t R;
+} sliderPos;
+	
+
+//PB0 og PB1 for knapper
+
+
+joystickAndSliderPos get_board_data() {
+	xmem_write(1, ADC_OFFSET);
+	joystickAndSliderPos data;
+	data.X_joystick = (int16_t) xmem_read(ADC_OFFSET);
+	data.Y_joystick =  (int16_t) xmem_read(ADC_OFFSET);
+	data.L_slider = (int16_t) xmem_read(ADC_OFFSET);
+	data.R_slider = (int16_t) xmem_read(ADC_OFFSET);
+	return data;
+}
+
+signedPos get_stick_offset() {
+	signedPos Offset;
+	joystickAndSliderPos data = get_board_data();
+	Offset.X = (int16_t) data.X_joystick - 128;
+	Offset.Y = (int16_t) data.Y_joystick - 128;
+	return Offset;
+}
+
+
+signedPos get_percent_pos(joystickAndSliderPos pos, signedPos offset) {
+	signedPos Percent;
+	if (pos.X_joystick > 128 + offset.X) {
+		Percent.X = (int16_t) (((double) (pos.X_joystick - offset.X - 128)) / (128 - offset.X) * 100.0);
+	} else {
+		Percent.X = (int16_t) (((double) (pos.X_joystick - offset.X - 128)) / (128 + offset.X) * 100.0);
+	}
+	
+	if (pos.Y_joystick > 128 + offset.Y) {
+		Percent.Y = (int16_t) (((double) (pos.Y_joystick - offset.Y - 128)) / (128 - offset.Y) * 100.0);
+		} else {
+		Percent.Y = (int16_t) (((double) (pos.Y_joystick - offset.Y - 128)) / (128 + offset.Y) * 100.0);
+	}
+	
+	return Percent;	
+}
+
+sliderPos get_slider_pos(joystickAndSliderPos pos) {  //returns in percent
+	sliderPos S;
+	S.R = (int16_t) (((double) (pos.R_slider)) / 255 * 100.0);
+	S.L = (int16_t) (((double) (pos.L_slider)) / 255 * 100.0);
+	return S;
+}
+
+JOYSTICKPOS get_discrete_direction(joystickAndSliderPos pos) {
+	if (pos.X_joystick > 123 && pos.X_joystick < 133 && pos.Y_joystick > 123 && pos.Y_joystick < 133) {
+		return NEUTRAL;
+	}
+	if (pos.X_joystick > pos.Y_joystick) {
+		if (pos.X_joystick > 128) {
+			return LEFT;
+			} else {
+			return UP;
+		}
+	} else {
+		if (pos.Y_joystick > 128) {
+			return DOWN;
+		} else {
+			return RIGHT;
+		}
+	}	
+}
+
+
 int main(void)
 {	
 	USART_Init(MYUBRR);
@@ -123,7 +224,8 @@ int main(void)
 	printf("UART initialized!\n");
 	
 	xmem_init();
-	SRAM_test();
+	uint16_t data = 0;
+	// SRAM_test();
 	
 	//printf("%4d", xmem_read(0x0832));
 	//xmem_write(0x11, 0x1);
@@ -132,7 +234,35 @@ int main(void)
 	
 	//DDRA = 1 << PA0;
 	//DDRE = 1 << PE1;
-	while (1) {
+	
+	uint32_t sleep = 0;
+	while(sleep < 100000) {
+		sleep++;
+	}
+	sleep = 0;
+	signedPos offset = get_stick_offset();
+	printf("X: %4d Y: %4d \n", offset.X, offset.Y);
+	
+	signedPos zeroOffset;
+	zeroOffset.X = 0;
+	zeroOffset.Y = 0;
+	
+	while (1)
+	{
+		if (sleep > 100000) {
+			//signedPos P = get_stick_offset();
+			signedPos P = get_percent_pos(get_board_data(), offset);
+			sliderPos Ps = get_slider_pos(get_board_data());
+			//joystickAndSliderPos Po = get_board_data(zeroOffset);
+			printf("X: %4d Y: %4d \n", P.X, P.Y);
+			//printf("L: %4d R: %4d \n", Ps.L, Ps.R);
+			sleep = 0;
+		}
+		
+		sleep++;
+	}
+		
+	while (0) {
 		char r = USART_Receive();
 		if (r == 's') {
 			xmem_write(1, SRAM_OFFSET - 1);
@@ -140,6 +270,21 @@ int main(void)
 		}
 		if (r == 'd') {
 			xmem_write(1, SRAM_OFFSET + 1);
+			printf("%4d", xmem_read(SRAM_OFFSET+1));
+			printf("a\n");
+		}
+		
+	}
+	
+	while (0) {
+		char r = USART_Receive();
+		if (r == 'w') {
+			xmem_write(1, ADC_OFFSET);
+			//printf("%4d", xmem_read(0x1));
+		}
+		if (r == 'r') {
+			data = (uint16_t) xmem_read(ADC_OFFSET);
+			printf("%d \n", data);
 		}
 		
 	}
