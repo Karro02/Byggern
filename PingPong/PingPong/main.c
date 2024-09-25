@@ -11,6 +11,8 @@
 
 #include "uart.h"
 #include "xmem.h"
+#include "oled.h"
+#include "fonts.h"
 
 void SRAM_test(void)
 {
@@ -66,14 +68,25 @@ int main(void)
 	signedPos offset = get_stick_offset();
 	printf("X: %4d Y: %4d \n", offset.X, offset.Y);
 	
+	OLED_init();
+	OLED_clear();
 	
-	while (0)
+	
+	//OLED_home(offset);
+	//OLED_sub_menu();
+	
+	while (1)
 	{
 		if (sleep > 100000) {
 			signedPos P = get_percent_pos(get_board_data(), offset);
 			sliderPos Ps = get_slider_pos(get_board_data());
-			printf("X: %4d Y: %4d \n", P.X, P.Y);
-			printf("L: %4d R: %4d \n", Ps.L, Ps.R);
+			JOYSTICKPOS POS = get_discrete_direction(offset);
+			buttonData PB = get_button_data();
+			//printf("X: %4d Y: %4d \n", P.X, P.Y);
+			//printf("L: %4d R: %4d \n", Ps.L, Ps.R);
+			//printf("%d \n", (int) POS);
+			//printf("JOY: %4d, L: %4d, R: %4d", PB.joy_button, PB.l_button, PB.r_button);
+			printf("%4d \n", PINB);
 			sleep = 0;
 		}
 		

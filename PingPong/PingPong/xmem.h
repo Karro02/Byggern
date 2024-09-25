@@ -1,3 +1,5 @@
+#pragma once
+
 #include <avr/io.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +35,12 @@ typedef struct {
 	volatile int16_t R;
 } sliderPos;
 
+typedef struct {
+	volatile int16_t joy_button;
+	volatile int16_t l_button;
+	volatile int16_t r_button;
+	} buttonData;
+
 
 
 void xmem_init();
@@ -44,5 +52,10 @@ joystickAndSliderPos get_board_data();
 signedPos get_stick_offset();
 signedPos get_percent_pos(joystickAndSliderPos pos, signedPos offset);
 sliderPos get_slider_pos(joystickAndSliderPos pos);
-JOYSTICKPOS get_discrete_direction(joystickAndSliderPos pos);
+JOYSTICKPOS get_discrete_direction(signedPos offset);
+
+buttonData get_button_data();
+
+
+
 

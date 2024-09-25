@@ -14,6 +14,9 @@ void xmem_init() {
 	TCCR3A |=  1 << WGM30 | 0 << WGM31 | 0 << COM3A0 | 1 << COM3A1;
 	TCCR3B |= 1 << WGM32 | 0 << ICES3 | 1 << CS30;
 	
+	
+	//Buttons
+	DDRB |= 1 << DDB2 | 1 << DDB1 | 1 << DDB0; 
 	//EMCUCR = 0 << SRW10 | 0 << SRW11;
 	
 
@@ -35,9 +38,9 @@ uint8_t xmem_read ( uint16_t addr ) {
 joystickAndSliderPos get_board_data() {
 	xmem_write(1, ADC_OFFSET);
 	joystickAndSliderPos data;
-	data.X_joystick = (int16_t) xmem_read(ADC_OFFSET);
-	data.Y_joystick =  (int16_t) xmem_read(ADC_OFFSET);
 	data.L_slider = (int16_t) xmem_read(ADC_OFFSET);
+	data.Y_joystick =  (int16_t) xmem_read(ADC_OFFSET);
+	data.X_joystick = (int16_t) xmem_read(ADC_OFFSET);
 	data.R_slider = (int16_t) xmem_read(ADC_OFFSET);
 	return data;
 }
@@ -75,21 +78,31 @@ sliderPos get_slider_pos(joystickAndSliderPos pos) {  //returns in percent
 	return S;
 }
 
-JOYSTICKPOS get_discrete_direction(joystickAndSliderPos pos) {
-	if (pos.X_joystick > 123 && pos.X_joystick < 133 && pos.Y_joystick > 123 && pos.Y_joystick < 133) {
+JOYSTICKPOS get_discrete_direction(signedPos offset) {
+	signedPos percent = get_percent_pos(get_board_data(), offset);
+	if (percent.X > -80 && percent.X < 80 && percent.Y > -80 && percent.Y < 80) {  //change value for sensitivity
 		return NEUTRAL;
 	}
-	if (pos.X_joystick > pos.Y_joystick) {
-		if (pos.X_joystick > 128) {
+	if (abs(percent.X) > abs(percent.Y))  {
+		if (percent.X < 0) {
 			return LEFT;
-		} else {
-			return UP;
-		}
-	} else {
-		if (pos.Y_joystick > 128) {
-			return DOWN;
 		} else {
 			return RIGHT;
 		}
+	} else {
+		if (percent.Y < 0) {
+			return DOWN;
+		} else {
+			return UP;
+		}
 	}
+}
+
+
+buttonData get_button_data() {
+	int data = PINB;
+	buttonData button_data;
+	button_data.joy_button = (PINB >> 2) & 0b1;  //At pb2
+	button_data.l_button = (PINB >> 1) & 0b1;	 //At pb1
+	button_data.r_button = (PINB >> 0) & 0b1;	 //At pb0
 }
