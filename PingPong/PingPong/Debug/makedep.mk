@@ -8,6 +8,8 @@ main.c
 
 oled.c
 
+spi.c
+
 uart.c
 
 xmem.c

@@ -16,7 +16,8 @@ void xmem_init() {
 	
 	
 	//Buttons
-	DDRB |= 1 << DDB2 | 1 << DDB1 | 1 << DDB0; 
+	DDRB |= 0 << DDB2 | 0 << DDB1 | 0 << DDB0; 
+	PORTB |= 1 << PB1;
 	//EMCUCR = 0 << SRW10 | 0 << SRW11;
 	
 
@@ -102,7 +103,8 @@ JOYSTICKPOS get_discrete_direction(signedPos offset) {
 buttonData get_button_data() {
 	int data = PINB;
 	buttonData button_data;
-	button_data.joy_button = (PINB >> 2) & 0b1;  //At pb2
-	button_data.l_button = (PINB >> 1) & 0b1;	 //At pb1
-	button_data.r_button = (PINB >> 0) & 0b1;	 //At pb0
+	button_data.joy_button = !((PINB >> 1) & 0b1);  //At pb2
+	button_data.l_button = (PINB >> 0) & 0b1;	 //At pb1
+	button_data.r_button = (PINB >> 2) & 0b1;	 //At pb0
+	return button_data;
 }

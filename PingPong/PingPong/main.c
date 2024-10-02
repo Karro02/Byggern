@@ -12,6 +12,7 @@
 #include "uart.h"
 #include "xmem.h"
 #include "oled.h"
+#include "spi.h"
 #include "fonts.h"
 
 void SRAM_test(void)
@@ -56,6 +57,9 @@ int main(void)
 	printf("UART initialized!\n");
 	xmem_init();
 	printf("xmem initialized! \n");
+	OLED_init();
+	SPI_MasterInit();
+	
 	
 	
 	SRAM_test();
@@ -67,11 +71,15 @@ int main(void)
 	sleep = 0;
 	signedPos offset = get_stick_offset();
 	printf("X: %4d Y: %4d \n", offset.X, offset.Y);
+	while(1)
+	{
+	SPI_MasterTransmit(0b00000011);		
+	}
 	
-	OLED_init();
-	OLED_clear();
+	printf("DATA: %c \n", SPDR);
 	
-	
+	//OLED_clear();
+	OLED_run(offset);
 	//OLED_home(offset);
 	//OLED_sub_menu();
 	
@@ -84,9 +92,9 @@ int main(void)
 			buttonData PB = get_button_data();
 			//printf("X: %4d Y: %4d \n", P.X, P.Y);
 			//printf("L: %4d R: %4d \n", Ps.L, Ps.R);
-			//printf("%d \n", (int) POS);
-			//printf("JOY: %4d, L: %4d, R: %4d", PB.joy_button, PB.l_button, PB.r_button);
-			printf("%4d \n", PINB);
+			printf("%d \n", (int) POS);
+			//printf("JOY: %4d, L: %4d, R: %4d \n", PB.joy_button, PB.l_button, PB.r_button);
+			//printf("%4d \n", PINB);
 			sleep = 0;
 		}
 		
