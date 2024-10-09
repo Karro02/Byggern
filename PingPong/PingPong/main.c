@@ -14,6 +14,7 @@
 #include "oled.h"
 #include "spi.h"
 #include "fonts.h"
+#include "mcp2515.h"
 
 void SRAM_test(void)
 {
@@ -58,31 +59,27 @@ int main(void)
 	xmem_init();
 	printf("xmem initialized! \n");
 	OLED_init();
-	SPI_MasterInit();
 	
+	if (!mcp2515_init()) {
+		printf("mcpc2515 initialized! \n");
+	}
 	
 	
 	SRAM_test();
 	
-	uint32_t sleep = 0;
-	while(sleep < 100000) {
-		sleep++;
-	}
-	sleep = 0;
+	
+	
 	signedPos offset = get_stick_offset();
 	printf("X: %4d Y: %4d \n", offset.X, offset.Y);
-	while(1)
-	{
-	SPI_MasterTransmit(0b00000011);		
-	}
 	
-	printf("DATA: %c \n", SPDR);
+	mcp2515_test_loopBack();
 	
 	//OLED_clear();
 	OLED_run(offset);
 	//OLED_home(offset);
 	//OLED_sub_menu();
 	
+	uint8_t sleep = 0;
 	while (1)
 	{
 		if (sleep > 100000) {

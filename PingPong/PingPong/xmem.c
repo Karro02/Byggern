@@ -47,6 +47,10 @@ joystickAndSliderPos get_board_data() {
 }
 
 signedPos get_stick_offset() {
+	uint32_t sleep = 0;
+	while(sleep < 100000) {
+		sleep++;
+	}
 	signedPos Offset;
 	joystickAndSliderPos data = get_board_data();
 	Offset.X = (int16_t) data.X_joystick - 128;
