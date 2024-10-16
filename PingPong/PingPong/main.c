@@ -74,6 +74,9 @@ int main(void)
 	
 	mcp2515_test_loopBack();
 	
+	
+	
+	
 	//OLED_clear();
 	OLED_run(offset);
 	//OLED_home(offset);
