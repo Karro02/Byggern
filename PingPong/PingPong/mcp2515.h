@@ -23,6 +23,7 @@ typedef struct{
 	char data[8];
 	} CAN_message;
 
+
 uint8_t mcp2515_init();
 void mcp2515_reset();
 uint8_t mcp2515_set_mode(uint8_t mode);
@@ -37,7 +38,7 @@ void mcp2515_bit_modify(uint8_t address, uint8_t mask, uint8_t data);
 void mcp2515_load_TX(TXBUFFER buffer, uint8_t data, uint16_t id);
 uint8_t mcp2515_read_RX(RXBUFFER buffer);
 
-//Sende mer generell data Pass på at lengde på melding matcher og at id er riktig. 
+//Sende mer generell data Pass på at lengde på melding matcher og at id er riktig. Maks lengde er 8 byte
 void mcp2515_load_mult_TX(TXBUFFER buffer, CAN_message message);
 CAN_message mcp2515_read_mult_RX(RXBUFFER buffer);
 

@@ -16,6 +16,7 @@
 #include "fonts.h"
 #include "mcp2515.h"
 
+
 void SRAM_test(void)
 {
 	volatile char *ext_ram = (char *) 0x1800; // Start address for the SRAM
@@ -69,14 +70,25 @@ int main(void)
 	
 	
 	
+	
+	
+	//mcp2515_test_loopBack();
+	
+	mcp2515_set_mode(MODE_NORMAL);
+	
+	int slep = 0;
+	while(1) {
+		if (slep > 10000) {
+			CAN_message msg = {1, 8, "helofrik"};
+			mcp2515_load_mult_TX(TX0, msg);
+			mcp2515_request_to_send(TX0);
+			slep = 0;
+		}
+		slep++;
+	}
+	
 	signedPos offset = get_stick_offset();
 	printf("X: %4d Y: %4d \n", offset.X, offset.Y);
-	
-	mcp2515_test_loopBack();
-	
-	
-	
-	
 	//OLED_clear();
 	OLED_run(offset);
 	//OLED_home(offset);
