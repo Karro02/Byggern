@@ -17,9 +17,9 @@ uint8_t mcp2515_init() {
 	//PropSeg + PS1 >= PS2
 	//PropSeg + PS1 >= T DELAY (typically 1-2 Tq)
 	//PS2 > SJW
-	mcp2515_write(MCP_CNF1, (SJW_1 | BRP_4)); //SJW = 1 * Tq, BRP = 4
-	mcp2515_write(MCP_CNF2, (BTLMODE | SAMPLE_1X | PS1_4 | PROPSEG_4)); //Enable manually set of PS2 in CNF3, Sample once at sample point, PS1 = PROPSEG = 4 * Tq
-	mcp2515_write(MCP_CNF3, (WAKFIL_ENABLE | PS2_4)); //Enable Wake_up filter, PS2 = 4 * Tq
+	mcp2515_write(MCP_CNF1, (SJW_1 | BRP_3)); //SJW = 1 * Tq, BRP = 3, Tq = 2 * (BRP + 1) / F_osc
+	mcp2515_write(MCP_CNF2, (BTLMODE | SAMPLE_1X | PS1_7 | PROPSEG_1)); //Enable manually set of PS2 in CNF3, Sample once at sample point, PS1 = PROPSEG = 4 * Tq
+	mcp2515_write(MCP_CNF3, (WAKFIL_ENABLE | PS2_6)); //Enable Wake_up filter, PS2 = 4 * Tq
 	
 	//trenger kanskje tx og mask register
 	//uint8_t current_cmd = mcp2515_read(MCP_RXB0CTRL);
@@ -88,15 +88,12 @@ void mcp2515_request_to_send(TXBUFFER buffer) {
 	switch (buffer) {
 		case TX0:
 			SPI_MasterWrite(MCP_RTS_TX0);
-			printf("TXREQ: 0x%02X\n", mcp2515_read(MCP_TXB0CTRL));
 			break;
 		case TX1:
 			SPI_MasterWrite(MCP_RTS_TX1);
-			printf("TXREQ: 0x%02X\n", mcp2515_read(MCP_TXB1CTRL));
 			break;
 		case TX2:
 			SPI_MasterWrite(MCP_RTS_TX2);
-			printf("TXREQ: 0x%02X\n", mcp2515_read(MCP_TXB2CTRL));
 			break;
 		//case ALL:
 			//SPI_MasterWrite(MCP_RTS_ALL);
@@ -254,6 +251,8 @@ CAN_message mcp2515_read_mult_RX(RXBUFFER buffer) {
 	}
 	PORTB |= (1 << CAN_CS); // Deselect CAN - controller
 // 	CAN_message message = {1, len, data};
+	message.data_length = len;
+	message.id = 1;
 	return message;
 }
 

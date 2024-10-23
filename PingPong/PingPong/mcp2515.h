@@ -173,7 +173,8 @@ Copyright 2003 Kimberly Otten Software Consulting
 #define SJW_4            0xC0
 
 //BRP_I = 0x0I
-#define BRP_4			 0x04
+#define BRP_2			 0x02
+#define BRP_3			 0x03
 
 
 // CNF2 Register Values

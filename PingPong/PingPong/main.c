@@ -76,8 +76,31 @@ int main(void)
 	
 	mcp2515_set_mode(MODE_NORMAL);
 	
-	int slep = 0;
+// 	CAN_message msg = {1, 8, "helofrik"};
+// 	mcp2515_load_mult_TX(TX0, msg);
+// 	mcp2515_request_to_send(TX0);
+
+	long slep = 0;
 	while(1) {
+		if (slep > 100000) {
+ 		uint8_t i = mcp2515_read(MCP_CANINTF);
+ 		printf("Reg: 0x%02X\n", i);
+ 		CAN_message msg = mcp2515_read_mult_RX(RX0);
+		printf("Id: %d\n", msg.id);
+		printf("%d\n", msg.data_length);
+		for (int i = 0; i < msg.data_length; i++) {
+			printf("%d", msg.data[i]);
+		}
+		printf("\n");
+		if (msg.data_length > 0) {
+			break;
+		}
+		slep = 0;
+		}
+		slep++;
+	}
+	
+	while(0) {
 		if (slep > 10000) {
 			CAN_message msg = {1, 8, "helofrik"};
 			mcp2515_load_mult_TX(TX0, msg);
@@ -86,6 +109,7 @@ int main(void)
 		}
 		slep++;
 	}
+	
 	
 	signedPos offset = get_stick_offset();
 	printf("X: %4d Y: %4d \n", offset.X, offset.Y);

@@ -21,24 +21,27 @@ void init_can() {
 // 	};
 
 //	From node1 we have:
-//	SJW = TQ, BRP = 4, PROPSEG = PS2 = PS1 = 4 * TQ, Sampinlg 1 time pr sample point. F_osc = 16 Mhz
-//	TQ = 2 * BRP * T_osc = 2 * BRP / F_osc must be equal for both nodes.
-//	-> TQ = 2 * 4 / 16Mhz = 1/2 Mhz = 500 ns
+//	SJW = TQ, BRP = 3, PROPSEG = 4*Tq,  PS2 = 5*Tq PS1 = 6 * TQ, Sampinlg 1 time pr sample point. F_osc = 16 Mhz
+//	TQ = 2 * (BRP + 1) * T_osc = 2 * BRP / F_osc must be equal for both nodes.
+//	-> TQ = 2 * (3 + 1) / 16Mhz = 1/2Mhz = 500 ns
 //	
-//	Node 1 has F_osc = 84000000 = 84 Mhz
-//	BRP(Node2) = BRP(Node1) F_osc(Node2)/F_osc(Node1) = 21
+//	Node 2 has F_osc = 84000000 = 84 Mhz
+
+//PS1 = 6 PS2 = 5
 
 //	For node 2
 //	T_csc = T_q?
+//	MCK = F_osc?
+//	tcsc = (BRP + 1)/MCK
+//	-> BRP = MCK * tcsc - 1 = 84 Mhz * 500ns - 1 = 42 - 1 = 41
 //	PS2 = t_csc * (phase2 + 1)
 //	PS1 = t_csc * (phase1 + 1)
 //	PROPAG = t_csc * (propag + 1)
 //	SJW = t_csc * (sjw + 1)
-//	tcsc = (BRP + 1)
 //	smp = 0 sample once, smp = 1 sample thrice
 
-	CanInit init = {3, 3, 3, 0, 20, 0};
-	can_init(init, 1); //Interupt enabled
+	CanInit init = {5, 0, 6, 0, 41, 0};
+	can_init(init, 0); //Interupt enabled
 	WDT->WDT_MR = WDT_MR_WDDIS; //reset watchdog timer
 }
 
@@ -51,6 +54,17 @@ void can_printmsg(CanMsg m){
         printf(", %d", m.byte[i]);
     }
     printf("})\n");
+}
+
+void can_print_signed_msg(CanMsg m){
+	printf("CanMsg(id:%d, length:%d, data:{", m.id, m.length);
+		if(m.length){
+			printf("%d", (int8_t) m.byte[0]);
+		}
+		for(uint8_t i = 1; i < m.length; i++){
+			printf(", %d", (int8_t) m.byte[i]);
+		}
+	printf("})\n");
 }
 
 
@@ -113,7 +127,7 @@ void can_tx(CanMsg m){
     while(!(CAN0->CAN_MB[txMailbox].CAN_MSR & CAN_MSR_MRDY)){}
     
     // Set message ID and use CAN 2.0B protocol
-    CAN0->CAN_MB[txMailbox].CAN_MID = CAN_MID_MIDvA(m.id) | CAN_MID_MIDE ;
+    CAN0->CAN_MB[txMailbox].CAN_MID = CAN_MID_MIDvA(m.id); //| CAN_MID_MIDE ;
         
     // Coerce maximum 8 byte length
     m.length = m.length > 8 ? 8 : m.length;

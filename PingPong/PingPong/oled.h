@@ -1,6 +1,7 @@
 #pragma once
 
 #include "xmem.h"
+#include "mcp2515.h"
 
 #define COMMAND_OFFSET 0x0000
 #define DATA_OFFSET 0x0200
@@ -27,5 +28,5 @@ void OLED_clear_line(int line);
 SCREEN_GUI OLED_home(signedPos offset, int wanted_pos[]);
 SCREEN_GUI OLED_sub_menu(signedPos offset);
 
-int OLED_menu(signedPos offset, screen_data screen, int wanted_pos[]);
+int OLED_menu(signedPos offset, screen_data screen, int wanted_pos[], SCREEN_GUI gui);
 void OLED_run(signedPos offset);

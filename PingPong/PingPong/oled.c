@@ -285,7 +285,7 @@ SCREEN_GUI OLED_home(signedPos offset, int wanted_pos[])
 }
 
 
-int OLED_menu(signedPos offset, screen_data screen, int wanted_pos[]) {
+int OLED_menu(signedPos offset, screen_data screen, int wanted_pos[], SCREEN_GUI gui) {
 	OLED_print_screen(screen);
 
 	int selected = wanted_pos[0];
@@ -298,6 +298,18 @@ int OLED_menu(signedPos offset, screen_data screen, int wanted_pos[]) {
 	{
 		if (sleep > 10000) {
 			JOYSTICKPOS P = get_discrete_direction(offset);
+			
+			if (gui == GAME)
+			{
+				signedPos Joystick = get_percent_pos(get_board_data(), offset);
+				//char m[8] = {3, 4};//{Joystick.X, Joystick.Y};
+				/*CAN_message msg = (3, 2, (char){(char)Joystick.X, (char)Joystick.Y});*/
+				CAN_message msg = {3, 2, {(char) Joystick.X, (char) Joystick.Y}};
+				mcp2515_load_mult_TX(TX0, msg);
+				mcp2515_request_to_send(TX0);
+				printf("X: %d Y: %d", Joystick.X, Joystick.Y);
+				
+			}
 			
 			if (should_move) {
 				if (P == UP) {
@@ -381,13 +393,25 @@ void OLED_run(signedPos offset) {
 	menu[7] = "                ";
 	
 	int wanted_pos_menu[] = {2, 4};
+		
+	screen_data game;
+	game[0] = "                ";
+	game[1] = "                ";
+	game[2] = "      Game      ";
+	game[3] = "     Running    ";
+	game[4] = "                ";
+	game[5] = "                ";
+	game[6] = "      Exit      ";
+	game[7] = "                ";
+	
+	int wanted_pos_game[] = {6, 6};
 	while (1) {
 		
 		if (gui == HOME)
 		{	
 			
 			
-			int pos = OLED_menu(offset, home, wanted_pos_home);
+			int pos = OLED_menu(offset, home, wanted_pos_home, gui);
 			printf("%d", pos);
 			if(pos == 4) {
 				gui = MENU;
@@ -401,10 +425,26 @@ void OLED_run(signedPos offset) {
 		{	
 			
 			
-			int pos = OLED_menu(offset, menu, wanted_pos_menu);
+			int pos = OLED_menu(offset, menu, wanted_pos_menu, gui);
 			printf("%d", pos);
 			if(pos == 4) {
 				gui = HOME;
+			}
+			if(pos == 2)
+			{
+				gui = GAME;
+			}
+			
+		}
+		
+		if (gui == GAME)
+		{
+			
+			
+			int pos = OLED_menu(offset, game, wanted_pos_game, gui);
+			printf("%d", pos);
+			if(pos == 6) {
+				gui = MENU;
 			}
 			
 		}

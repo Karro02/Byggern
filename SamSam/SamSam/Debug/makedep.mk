@@ -8,6 +8,8 @@ Device_Startup\startup_sam3xa.c
 
 Device_Startup\system_sam3xa.c
 
+game_time.c
+
 main.c
 
 time.c
