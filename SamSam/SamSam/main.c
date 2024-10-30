@@ -23,12 +23,29 @@ int main(void)
 	uart_init(F_CPU, BAUDRATE);
 	printf("HEI pa verden\n");
 	init_can();
+	servo_init();
+	adc_init();
 	
-    /* Replace with your application code */
+	int a = 1;
+	while(1) {
+		
+		if (a) { //kjøre denne når vi får en medling
+			runGame(2);
+			a = 0;
+		}
+	}
+
+
+	return 0;
+}
+
+
+void oldTests() {
+	/* Replace with your application code */
 	CanMsg test;
-// 	while(1) {
-// 		CAN0_Handler();
-// 	}
+	// 	while(1) {
+	// 		CAN0_Handler();
+	// 	}
 	CanMsg response = {1, 2, {10, 3}};
 	can_printmsg(response);
 	can_tx(response);
@@ -36,51 +53,46 @@ int main(void)
 		//printf("asdf\n");
 		can_tx(response);
 		//printf("sfd\n");
- 		//uint8_t data = (uint8_t) (*(uint32_t*)REG_CAN0_SR >> 24);
- 		//printf("0x%02X\n", data);
+		//uint8_t data = (uint8_t) (*(uint32_t*)REG_CAN0_SR >> 24);
+		//printf("0x%02X\n", data);
 		//printf("%02x\n", data);
 		//printf("0x%02X \n"*(uint32_t*)REG_CAN0_SR);
 	}
 	
 	
 	int sleep = 0;
-// 	while(!can_rx(&test)) {
-// 		if (sleep > 2000000) {
-// 			printf("ingeting\n");
-// // 			printf("BOFF: %d\n", *(REG_CAN0_SR + CAN_SR_BOFF));
-// // 			printf("ERRA: %d\n", *(REG_CAN0_SR + CAN_SR_ERRA));
-// // 			printf("ERRP: %d\n", *(REG_CAN0_SR + CAN_SR_ERRP));
-// 			sleep = 0;
-// 		}
-// 		sleep++;
-// 	}
+	// 	while(!can_rx(&test)) {
+	// 		if (sleep > 2000000) {
+	// 			printf("ingeting\n");
+	// // 			printf("BOFF: %d\n", *(REG_CAN0_SR + CAN_SR_BOFF));
+	// // 			printf("ERRA: %d\n", *(REG_CAN0_SR + CAN_SR_ERRA));
+	// // 			printf("ERRP: %d\n", *(REG_CAN0_SR + CAN_SR_ERRP));
+	// 			sleep = 0;
+	// 		}
+	// 		sleep++;
+	// 	}
 	//printf("sdafasdf");
 	can_printmsg(test);
 	printf("%s\n", test.byte);
 	
 	
-	while(1)
+	
+	while(0)
 	{
 		if (can_rx(&test))
-		{	
+		{
 			SignedTuple a = getJoystickPos(test);
 			printf("X: %d Y: %d\n", a.X, a.Y);
 			//can_print_signed_msg(test);
 		}
 	}
-    while (0) 
-    {
+	while (0)
+	{
 		int sleep = 0;
 		while (sleep < 1000){sleep++;}
 		//sleep = 0;
 		//REG_PIOB_SODR = (1 << 13);
 		//while (sleep < 1000){sleep++;}
 		//REG_PIOB_CODR = (1 << 13);
-		
-		
-		
-		
-		
-    }
-	return 0;
+	}
 }

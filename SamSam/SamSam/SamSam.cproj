@@ -164,6 +164,12 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="gameBoard.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="gameBoard.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="time.c">
       <SubType>compile</SubType>
     </Compile>

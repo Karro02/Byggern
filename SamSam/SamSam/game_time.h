@@ -1,6 +1,7 @@
 #pragma once
 
 #include "can.h"
+#include "gameBoard.h"
 
 typedef struct{
 	int8_t X;
@@ -8,3 +9,7 @@ typedef struct{
 	} SignedTuple;
 	
 SignedTuple getJoystickPos(CanMsg m);
+
+int detectHit();
+
+void runGame(int lifes);

@@ -12,6 +12,8 @@ game_time.c
 
 main.c
 
+gameBoard.c
+
 time.c
 
 uart.c
