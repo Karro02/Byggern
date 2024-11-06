@@ -81,7 +81,7 @@ int main(void)
 // 	mcp2515_request_to_send(TX0);
 
 	long slep = 0;
-	while(1) {
+	while(0) {
 		if (slep > 100000) {
  		uint8_t i = mcp2515_read(MCP_CANINTF);
  		printf("Reg: 0x%02X\n", i);
@@ -119,7 +119,7 @@ int main(void)
 	//OLED_sub_menu();
 	
 	uint8_t sleep = 0;
-	while (1)
+	while (0)
 	{
 		if (sleep > 100000) {
 			signedPos P = get_percent_pos(get_board_data(), offset);

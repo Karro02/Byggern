@@ -25,6 +25,9 @@ int main(void)
 	init_can();
 	servo_init();
 	adc_init();
+	motor_init();
+	encoder_init();
+	solenoid_init();
 	
 	int a = 1;
 	while(1) {

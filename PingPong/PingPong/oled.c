@@ -294,23 +294,39 @@ int OLED_menu(signedPos offset, screen_data screen, int wanted_pos[], SCREEN_GUI
 	
 	int wanted_index = 0;
 	
+	if (gui == GAME)
+	{
+		while(1)
+		{	
+			if (sleep > 10000) {
+				CAN_message receive_msg = mcp2515_read_mult_RX(RX1);
+				printf("%d\n", receive_msg.id);
+//  				if(((int) receive_msg.id) == 2)
+// 				//if (1 == 2)
+//  				{
+//  					printf("død\n");
+// 					break;
+//  				}
+				signedPos Joystick = get_percent_pos(get_board_data(), offset);
+				int joy_button = get_button_data().joy_button;
+				//char m[8] = {3, 4};//{Joystick.X, Joystick.Y};
+				/*CAN_message msg = (3, 2, (char){(char)Joystick.X, (char)Joystick.Y});*/
+				CAN_message msg = {3, 3, {(char) Joystick.X, (char) Joystick.Y, (char) joy_button}};
+				mcp2515_load_mult_TX(TX0, msg);
+				mcp2515_request_to_send(TX0);
+				printf("X: %d Y: %d\n", Joystick.X, Joystick.Y);
+				
+				sleep = 0;
+				}
+			sleep++;
+		}
+		
+	}
+	
 	while(1)
 	{
 		if (sleep > 10000) {
 			JOYSTICKPOS P = get_discrete_direction(offset);
-			
-			if (gui == GAME)
-			{
-				signedPos Joystick = get_percent_pos(get_board_data(), offset);
-				//char m[8] = {3, 4};//{Joystick.X, Joystick.Y};
-				/*CAN_message msg = (3, 2, (char){(char)Joystick.X, (char)Joystick.Y});*/
-				CAN_message msg = {3, 2, {(char) Joystick.X, (char) Joystick.Y}};
-				mcp2515_load_mult_TX(TX0, msg);
-				mcp2515_request_to_send(TX0);
-				printf("X: %d Y: %d", Joystick.X, Joystick.Y);
-				
-			}
-			
 			if (should_move) {
 				if (P == UP) {
 					OLED_print(screen[selected]);
