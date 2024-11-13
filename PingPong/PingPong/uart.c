@@ -28,21 +28,22 @@ unsigned char USART_Receive(void)
 	/* Get and return received data from buffer */
 	return UDR0;
 }
-//Maybe implement if else to return only the thing in the register
 
+
+//Code from chatGPT
 int uart_putchar(char c, FILE *stream) {
 	if (c == '\n') {
-		USART_Transmit('\r');  // Send carriage return before newline
+		USART_Transmit('\r');
 	}
 	USART_Transmit(c);
 	return 0;
 }
 
-// Custom receive function (optional, for scanf or similar)
+//Code from chatGPT
 int uart_getchar(FILE *stream) {
 	return USART_Receive();
 }
 
 void printf_init() {
-	fdevopen(uart_putchar, uart_getchar); //kan trenge referanse til funksjonen
+	fdevopen(uart_putchar, uart_getchar);
 }

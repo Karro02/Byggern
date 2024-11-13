@@ -7,14 +7,12 @@
 typedef enum{
 	TX0 = 0,
 	TX1 = 1,
-	TX2 = 2,
-	TX_ALL = 3
+	TX2 = 2
 	} TXBUFFER;
 
 typedef enum{
 	RX0 = 0,
-	RX1 = 1,
-	RX_ALL = 2
+	RX1 = 1
 } RXBUFFER;
 
 typedef struct{

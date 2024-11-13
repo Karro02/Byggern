@@ -4,21 +4,6 @@
 #include <stdio.h>
 
 void init_can() {
-	
-// 	typedef struct CanInit CanInit;
-// 	__attribute__((packed)) struct CanInit {
-// 		union {
-// 			struct {
-// 				uint32_t phase2:4;  // Phase 2 segment
-// 				uint32_t propag:4;  // Propagation time segment
-// 				uint32_t phase1:4;  // Phase 1 segment
-// 				uint32_t sjw:4;     // Synchronization jump width
-// 				uint32_t brp:8;     // Baud rate prescaler
-// 				uint32_t smp:8;     // Sampling mode
-// 			};
-// 			uint32_t reg; //Refererer til structen over
-// 		};
-// 	};
 
 //	From node1 we have:
 //	SJW = TQ, BRP = 3, PROPSEG = 4*Tq,  PS2 = 5*Tq PS1 = 6 * TQ, Sampinlg 1 time pr sample point. F_osc = 16 Mhz
@@ -44,6 +29,8 @@ void init_can() {
 	can_init(init, 0); //Interupt enabled
 	WDT->WDT_MR = WDT_MR_WDDIS; //reset watchdog timer
 }
+
+// Delivered code:
 
 void can_printmsg(CanMsg m){
     printf("CanMsg(id:%d, length:%d, data:{", m.id, m.length);
@@ -161,30 +148,4 @@ uint8_t can_rx(CanMsg* m){
     return 1;
 }
     
-    
-
-    
-
-// Example CAN interrupt handler
-void CAN0_Handler(void){
-    char can_sr = CAN0->CAN_SR; 
-    
-    // RX interrupt
-    if(can_sr & (1 << rxMailbox)){
-        // Add your message-handling code here
-		CanMsg data;
-		can_rx(&data);
-        can_printmsg(data);
-    } else {
-		//printf("Ikke riktig\n");
-        //printf("CAN0 message arrived in non-used mailbox\n\r");
-    }
-    
-    if(can_sr & CAN_SR_MB0){
-        // Disable interrupt
-        CAN0->CAN_IDR = CAN_IER_MB0;
-    }
-    
-    NVIC_ClearPendingIRQ(ID_CAN0);
-} 
 

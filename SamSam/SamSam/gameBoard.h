@@ -23,5 +23,4 @@ void solenoid_init();
 
 void activate_solenoid(int joy_btn);
 
-uint32_t calibrate_encoder();
 

@@ -3,31 +3,31 @@ PingPong.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         000002f6  00800100  000022c2  00002356  2**0
+  0 .data         000002d4  00800100  000022c2  00002356  2**0
                   CONTENTS, ALLOC, LOAD, DATA
   1 .text         000022c2  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          0000000a  008003f6  008003f6  0000264c  2**0
+  2 .bss          0000000a  008003d4  008003d4  0000262a  2**0
                   ALLOC
-  3 .comment      0000005c  00000000  00000000  0000264c  2**0
+  3 .comment      0000005c  00000000  00000000  0000262a  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000026a8  2**2
+  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00002688  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000230  00000000  00000000  000026e4  2**0
+  5 .debug_aranges 00000220  00000000  00000000  000026c4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00002f64  00000000  00000000  00002914  2**0
+  6 .debug_info   00002cf8  00000000  00000000  000028e4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 000010cd  00000000  00000000  00005878  2**0
+  7 .debug_abbrev 0000102b  00000000  00000000  000055dc  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000016a5  00000000  00000000  00006945  2**0
+  8 .debug_line   000014a8  00000000  00000000  00006607  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000758  00000000  00000000  00007fec  2**2
+  9 .debug_frame  000006b0  00000000  00000000  00007ab0  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    0000094d  00000000  00000000  00008744  2**0
+ 10 .debug_str    00000927  00000000  00000000  00008160  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00001e9c  00000000  00000000  00009091  2**0
+ 11 .debug_loc    00001a90  00000000  00000000  00008a87  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000260  00000000  00000000  0000af2d  2**0
+ 12 .debug_ranges 00000220  00000000  00000000  0000a517  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -458,13 +458,13 @@ Disassembly of section .text:
      37e:	02 c0       	rjmp	.+4      	; 0x384 <__do_copy_data+0x10>
      380:	05 90       	lpm	r0, Z+
      382:	0d 92       	st	X+, r0
-     384:	a6 3f       	cpi	r26, 0xF6	; 246
+     384:	a4 3d       	cpi	r26, 0xD4	; 212
      386:	b1 07       	cpc	r27, r17
      388:	d9 f7       	brne	.-10     	; 0x380 <__do_copy_data+0xc>
 
 0000038a <__do_clear_bss>:
-     38a:	24 e0       	ldi	r18, 0x04	; 4
-     38c:	a6 ef       	ldi	r26, 0xF6	; 246
+     38a:	23 e0       	ldi	r18, 0x03	; 3
+     38c:	a4 ed       	ldi	r26, 0xD4	; 212
      38e:	b3 e0       	ldi	r27, 0x03	; 3
      390:	01 c0       	rjmp	.+2      	; 0x394 <.do_clear_bss_start>
 
@@ -472,7 +472,7 @@ Disassembly of section .text:
      392:	1d 92       	st	X+, r1
 
 00000394 <.do_clear_bss_start>:
-     394:	a0 30       	cpi	r26, 0x00	; 0
+     394:	ae 3d       	cpi	r26, 0xDE	; 222
      396:	b2 07       	cpc	r27, r18
      398:	e1 f7       	brne	.-8      	; 0x392 <.do_clear_bss_loop>
      39a:	0e 94 4e 02 	call	0x49c	; 0x49c <main>
@@ -773,10 +773,10 @@ int main(void)
      526:	08 95       	ret
 
 00000528 <mcp2515_reset>:
+			break;
+	}
+	SPI_MasterWrite(data);
 	PORTB |= (1 << CAN_CS); // Deselect CAN - controller
-	
-	//mcp2515_write(MCP_TXB0CTRL + 0x01, 0x0);
-	//mcp2515_write(MCP_TXB0CTRL + 0x02, 0x20);
 	
 }
      528:	88 b3       	in	r24, 0x18	; 24
@@ -1019,7 +1019,6 @@ void mcp2515_load_mult_TX(TXBUFFER buffer, CAN_message message) {
      700:	41 c0       	rjmp	.+130    	; 0x784 <mcp2515_load_mult_TX+0xc4>
      702:	3d c0       	rjmp	.+122    	; 0x77e <mcp2515_load_mult_TX+0xbe>
 		case TX0:
-			//tx_transmit_message(0x30, data);
 			mcp2515_write(MCP_TXB0CTRL + 0x01, message.id >> 3);	//SIDH (Standard identifier high)
      704:	09 81       	ldd	r16, Y+1	; 0x01
      706:	1a 81       	ldd	r17, Y+2	; 0x02
@@ -1158,7 +1157,6 @@ void mcp2515_load_mult_TX(TXBUFFER buffer, CAN_message message) {
 		SPI_MasterWrite(message.data[i]);
 	}
 	
-	//SPI_MasterWrite(0x55);  //bare å write flere ganger for å skrive mer en en byte data
 	PORTB |= (1 << CAN_CS); // Deselect CAN - controller
      7e2:	88 b3       	in	r24, 0x18	; 24
      7e4:	80 61       	ori	r24, 0x10	; 16
@@ -1538,8 +1536,8 @@ void OLED_set_brightness(int lvl)
      aea:	0e 94 9e 02 	call	0x53c	; 0x53c <mcp2515_read>
      aee:	80 ff       	sbrs	r24, 0
      af0:	0c c0       	rjmp	.+24     	; 0xb0a <OLED_menu+0x86>
-     af2:	86 e3       	ldi	r24, 0x36	; 54
-     af4:	93 e0       	ldi	r25, 0x03	; 3
+     af2:	81 ee       	ldi	r24, 0xE1	; 225
+     af4:	92 e0       	ldi	r25, 0x02	; 2
      af6:	0e 94 9e 0c 	call	0x193c	; 0x193c <puts>
      afa:	40 e0       	ldi	r20, 0x00	; 0
      afc:	61 e0       	ldi	r22, 0x01	; 1
@@ -1609,8 +1607,8 @@ void OLED_set_brightness(int lvl)
      b88:	6f 92       	push	r6
      b8a:	5f 92       	push	r5
      b8c:	7f 92       	push	r7
-     b8e:	8a e3       	ldi	r24, 0x3A	; 58
-     b90:	93 e0       	ldi	r25, 0x03	; 3
+     b8e:	85 ee       	ldi	r24, 0xE5	; 229
+     b90:	92 e0       	ldi	r25, 0x02	; 2
      b92:	9f 93       	push	r25
      b94:	8f 93       	push	r24
      b96:	0e 94 88 0c 	call	0x1910	; 0x1910 <printf>
@@ -1822,8 +1820,8 @@ void OLED_run(signedPos offset) {
 	SCREEN_GUI gui = HOME;
 	screen_data home;
 	home[0] = "----------------";
-     d36:	23 e0       	ldi	r18, 0x03	; 3
-     d38:	33 e0       	ldi	r19, 0x03	; 3
+     d36:	22 ef       	ldi	r18, 0xF2	; 242
+     d38:	32 e0       	ldi	r19, 0x02	; 2
      d3a:	3a 83       	std	Y+2, r19	; 0x02
      d3c:	29 83       	std	Y+1, r18	; 0x01
 	home[1] = "                ";
@@ -1832,7 +1830,7 @@ void OLED_run(signedPos offset) {
      d42:	9c 83       	std	Y+4, r25	; 0x04
      d44:	8b 83       	std	Y+3, r24	; 0x03
 	home[2] = "  welcome home  ";
-     d46:	47 e4       	ldi	r20, 0x47	; 71
+     d46:	43 e0       	ldi	r20, 0x03	; 3
      d48:	53 e0       	ldi	r21, 0x03	; 3
      d4a:	5e 83       	std	Y+6, r21	; 0x06
      d4c:	4d 83       	std	Y+5, r20	; 0x05
@@ -1840,7 +1838,7 @@ void OLED_run(signedPos offset) {
      d4e:	98 87       	std	Y+8, r25	; 0x08
      d50:	8f 83       	std	Y+7, r24	; 0x07
 	home[4] = "      menu      ";
-     d52:	48 e5       	ldi	r20, 0x58	; 88
+     d52:	44 e1       	ldi	r20, 0x14	; 20
      d54:	53 e0       	ldi	r21, 0x03	; 3
      d56:	5a 87       	std	Y+10, r21	; 0x0a
      d58:	49 87       	std	Y+9, r20	; 0x09
@@ -1869,16 +1867,16 @@ void OLED_run(signedPos offset) {
      d76:	98 8f       	std	Y+24, r25	; 0x18
      d78:	8f 8b       	std	Y+23, r24	; 0x17
 	menu[2] = "   Start Game   ";
-     d7a:	41 ee       	ldi	r20, 0xE1	; 225
-     d7c:	52 e0       	ldi	r21, 0x02	; 2
+     d7a:	45 e2       	ldi	r20, 0x25	; 37
+     d7c:	53 e0       	ldi	r21, 0x03	; 3
      d7e:	5a 8f       	std	Y+26, r21	; 0x1a
      d80:	49 8f       	std	Y+25, r20	; 0x19
 	menu[3] = "                ";
      d82:	9c 8f       	std	Y+28, r25	; 0x1c
      d84:	8b 8f       	std	Y+27, r24	; 0x1b
 	menu[4] = "  Back to Home  ";
-     d86:	42 ef       	ldi	r20, 0xF2	; 242
-     d88:	52 e0       	ldi	r21, 0x02	; 2
+     d86:	46 e3       	ldi	r20, 0x36	; 54
+     d88:	53 e0       	ldi	r21, 0x03	; 3
      d8a:	5e 8f       	std	Y+30, r21	; 0x1e
      d8c:	4d 8f       	std	Y+29, r20	; 0x1d
 	menu[5] = "                ";
@@ -1907,12 +1905,12 @@ void OLED_run(signedPos offset) {
      daa:	9c a7       	std	Y+44, r25	; 0x2c
      dac:	8b a7       	std	Y+43, r24	; 0x2b
 	game[2] = "      Game      ";
-     dae:	29 e6       	ldi	r18, 0x69	; 105
+     dae:	27 e4       	ldi	r18, 0x47	; 71
      db0:	33 e0       	ldi	r19, 0x03	; 3
      db2:	3e a7       	std	Y+46, r19	; 0x2e
      db4:	2d a7       	std	Y+45, r18	; 0x2d
 	game[3] = "     Running    ";
-     db6:	2a e7       	ldi	r18, 0x7A	; 122
+     db6:	28 e5       	ldi	r18, 0x58	; 88
      db8:	33 e0       	ldi	r19, 0x03	; 3
      dba:	38 ab       	std	Y+48, r19	; 0x30
      dbc:	2f a7       	std	Y+47, r18	; 0x2f
@@ -1984,7 +1982,7 @@ void OLED_run(signedPos offset) {
 			printf("%d", pos);
      e04:	ff 92       	push	r15
      e06:	8f 93       	push	r24
-     e08:	8b e8       	ldi	r24, 0x8B	; 139
+     e08:	89 e6       	ldi	r24, 0x69	; 105
      e0a:	93 e0       	ldi	r25, 0x03	; 3
      e0c:	9f 93       	push	r25
      e0e:	8f 93       	push	r24
@@ -2000,14 +1998,13 @@ void OLED_run(signedPos offset) {
      e22:	09 f4       	brne	.+2      	; 0xe26 <OLED_run+0x10e>
 				gui = MENU;
      e24:	11 e0       	ldi	r17, 0x01	; 1
-			}
-			//gui = OLED_home(offset, wanted_pos);  //including while loop returning new condition			
+			}		
 		}
 		
 		printf("%d", gui);
      e26:	1f 92       	push	r1
      e28:	1f 93       	push	r17
-     e2a:	8b e8       	ldi	r24, 0x8B	; 139
+     e2a:	89 e6       	ldi	r24, 0x69	; 105
      e2c:	93 e0       	ldi	r25, 0x03	; 3
      e2e:	9f 93       	push	r25
      e30:	8f 93       	push	r24
@@ -2038,7 +2035,7 @@ void OLED_run(signedPos offset) {
 			printf("%d", pos);
      e5a:	ff 92       	push	r15
      e5c:	8f 93       	push	r24
-     e5e:	8b e8       	ldi	r24, 0x8B	; 139
+     e5e:	89 e6       	ldi	r24, 0x69	; 105
      e60:	93 e0       	ldi	r25, 0x03	; 3
      e62:	9f 93       	push	r25
      e64:	8f 93       	push	r24
@@ -2088,7 +2085,7 @@ void OLED_run(signedPos offset) {
 			printf("%d", pos);
      ea2:	ff 92       	push	r15
      ea4:	8f 93       	push	r24
-     ea6:	8b e8       	ldi	r24, 0x8B	; 139
+     ea6:	89 e6       	ldi	r24, 0x69	; 105
      ea8:	93 e0       	ldi	r25, 0x03	; 3
      eaa:	9f 93       	push	r25
      eac:	8f 93       	push	r24
@@ -2118,17 +2115,17 @@ void OLED_run(signedPos offset) {
      ece:	9a af       	std	Y+58, r25	; 0x3a
      ed0:	89 af       	std	Y+57, r24	; 0x39
 			game_over[1] = "       :(       ";
-     ed2:	2e e8       	ldi	r18, 0x8E	; 142
+     ed2:	2c e6       	ldi	r18, 0x6C	; 108
      ed4:	33 e0       	ldi	r19, 0x03	; 3
      ed6:	3c af       	std	Y+60, r19	; 0x3c
      ed8:	2b af       	std	Y+59, r18	; 0x3b
 			game_over[2] = "    Game Over   ";
-     eda:	2f e9       	ldi	r18, 0x9F	; 159
+     eda:	2d e7       	ldi	r18, 0x7D	; 125
      edc:	33 e0       	ldi	r19, 0x03	; 3
      ede:	3e af       	std	Y+62, r19	; 0x3e
      ee0:	2d af       	std	Y+61, r18	; 0x3d
 			game_over[3] = "     Score:     ";
-     ee2:	20 eb       	ldi	r18, 0xB0	; 176
+     ee2:	2e e8       	ldi	r18, 0x8E	; 142
      ee4:	33 e0       	ldi	r19, 0x03	; 3
      ee6:	21 96       	adiw	r28, 0x01	; 1
      ee8:	3f af       	std	Y+63, r19	; 0x3f
@@ -2140,7 +2137,7 @@ void OLED_run(signedPos offset) {
      ef2:	8e af       	std	Y+62, r24	; 0x3e
      ef4:	25 97       	sbiw	r28, 0x05	; 5
 			game_over[6] = "      Exit      ";
-     ef6:	21 ec       	ldi	r18, 0xC1	; 193
+     ef6:	2f e9       	ldi	r18, 0x9F	; 159
      ef8:	33 e0       	ldi	r19, 0x03	; 3
      efa:	27 96       	adiw	r28, 0x07	; 7
      efc:	3f af       	std	Y+63, r19	; 0x3f
@@ -2162,7 +2159,7 @@ void OLED_run(signedPos offset) {
 				sprintf(game_over[4], "       -%d-      ", score);
      f14:	1f 92       	push	r1
      f16:	8f 93       	push	r24
-     f18:	82 ed       	ldi	r24, 0xD2	; 210
+     f18:	80 eb       	ldi	r24, 0xB0	; 176
      f1a:	93 e0       	ldi	r25, 0x03	; 3
      f1c:	9f 93       	push	r25
      f1e:	8f 93       	push	r24
@@ -2182,7 +2179,6 @@ void OLED_run(signedPos offset) {
      f3c:	0f 90       	pop	r0
      f3e:	0f 90       	pop	r0
      f40:	2f c0       	rjmp	.+94     	; 0xfa0 <OLED_run+0x288>
-				//screen[6] = {' ', ' ', ' ', ' ', ' ', "        " + (char*)score + "       ";
 			}
 			else if (score < 100)
      f42:	84 36       	cpi	r24, 0x64	; 100
@@ -2191,7 +2187,7 @@ void OLED_run(signedPos offset) {
 				sprintf(game_over[4], "       -%d-     ", score);
      f46:	1f 92       	push	r1
      f48:	8f 93       	push	r24
-     f4a:	84 ee       	ldi	r24, 0xE4	; 228
+     f4a:	82 ec       	ldi	r24, 0xC2	; 194
      f4c:	93 e0       	ldi	r25, 0x03	; 3
      f4e:	9f 93       	push	r25
      f50:	8f 93       	push	r24
@@ -2211,14 +2207,13 @@ void OLED_run(signedPos offset) {
      f6e:	0f 90       	pop	r0
      f70:	0f 90       	pop	r0
      f72:	16 c0       	rjmp	.+44     	; 0xfa0 <OLED_run+0x288>
-				//screen[6] = "        " + (char*)score + "      ";
 			}
 			else if (score < 1000)
 			{
 				sprintf(game_over[4], "      -%d-     ", score);
      f74:	1f 92       	push	r1
      f76:	8f 93       	push	r24
-     f78:	85 ee       	ldi	r24, 0xE5	; 229
+     f78:	83 ec       	ldi	r24, 0xC3	; 195
      f7a:	93 e0       	ldi	r25, 0x03	; 3
      f7c:	9f 93       	push	r25
      f7e:	8f 93       	push	r24
@@ -2237,7 +2232,6 @@ void OLED_run(signedPos offset) {
      f9a:	0f 90       	pop	r0
      f9c:	0f 90       	pop	r0
      f9e:	0f 90       	pop	r0
-				//screen[6] = "       " + (char*)score + "      ";
 			}
 			
 			int pos = OLED_menu(offset, game_over, wanted_pos_game, gui);
@@ -2255,7 +2249,7 @@ void OLED_run(signedPos offset) {
 			printf("%d", pos);
      fb8:	ff 92       	push	r15
      fba:	8f 93       	push	r24
-     fbc:	8b e8       	ldi	r24, 0x8B	; 139
+     fbc:	89 e6       	ldi	r24, 0x69	; 105
      fbe:	93 e0       	ldi	r25, 0x03	; 3
      fc0:	9f 93       	push	r25
      fc2:	8f 93       	push	r24
@@ -2278,12 +2272,12 @@ void SPI_MasterInit(void)
 {
 	/* Set MOSI and SCK output, all others input */
 	//DDR_SPI = (1<<DD_MOSI)|(1<<DD_SCK);
-	DDRB |= (1 << DDB4) | (1 << DDB5) | (1 << DDB7); //(1<<DDB5)|(1<<DDB7);
+	DDRB |= (1 << DDB4) | (1 << DDB5) | (1 << DDB7);
      fdc:	87 b3       	in	r24, 0x17	; 23
      fde:	80 6b       	ori	r24, 0xB0	; 176
      fe0:	87 bb       	out	0x17, r24	; 23
 	/* Enable SPI, Master, set clock rate fck/16 */
-	SPCR |= (1<<SPE)|(1<<MSTR)|(1<<SPR0); //|(1<<CPOL);
+	SPCR |= (1<<SPE)|(1<<MSTR)|(1<<SPR0);
      fe2:	8d b1       	in	r24, 0x0d	; 13
      fe4:	81 65       	ori	r24, 0x51	; 81
      fe6:	8d b9       	out	0x0d, r24	; 13
@@ -2297,7 +2291,6 @@ void SPI_MasterInit(void)
 }
 void SPI_MasterTransmit(char cData)
 {	
-	//PORTB &= ~(1 << PB4);
 	/* Start transmission */
 	SPDR = cData;
      ff0:	8f b9       	out	0x0f, r24	; 15
@@ -2305,7 +2298,6 @@ void SPI_MasterTransmit(char cData)
 	while(!(SPSR & (1<<SPIF)));
      ff2:	77 9b       	sbis	0x0e, 7	; 14
      ff4:	fe cf       	rjmp	.-4      	; 0xff2 <SPI_MasterTransmit+0x2>
-	//PORTB |= 1 << PB4;
 }
      ff6:	08 95       	ret
 
@@ -2362,18 +2354,18 @@ void USART_Transmit(unsigned char data)
     101c:	08 95       	ret
 
 0000101e <uart_putchar>:
-	/* Get and return received data from buffer */
 	return UDR0;
 }
-//Maybe implement if else to return only the thing in the register
 
+
+//Code from chatGPT
 int uart_putchar(char c, FILE *stream) {
     101e:	cf 93       	push	r28
     1020:	c8 2f       	mov	r28, r24
 	if (c == '\n') {
     1022:	8a 30       	cpi	r24, 0x0A	; 10
     1024:	19 f4       	brne	.+6      	; 0x102c <uart_putchar+0xe>
-		USART_Transmit('\r');  // Send carriage return before newline
+		USART_Transmit('\r');
     1026:	8d e0       	ldi	r24, 0x0D	; 13
     1028:	0e 94 0b 08 	call	0x1016	; 0x1016 <USART_Transmit>
 	}
@@ -2406,7 +2398,7 @@ unsigned char USART_Receive(void)
 	return 0;
 }
 
-// Custom receive function (optional, for scanf or similar)
+//Code from chatGPT
 int uart_getchar(FILE *stream) {
 	return USART_Receive();
     1042:	0e 94 1d 08 	call	0x103a	; 0x103a <USART_Receive>
@@ -2417,7 +2409,7 @@ int uart_getchar(FILE *stream) {
 0000104a <printf_init>:
 
 void printf_init() {
-	fdevopen(uart_putchar, uart_getchar); //kan trenge referanse til funksjonen
+	fdevopen(uart_putchar, uart_getchar);
     104a:	61 e2       	ldi	r22, 0x21	; 33
     104c:	78 e0       	ldi	r23, 0x08	; 8
     104e:	8f e0       	ldi	r24, 0x0F	; 15
@@ -3549,12 +3541,12 @@ buttonData get_button_data() {
     18b4:	02 87       	std	Z+10, r16	; 0x0a
     18b6:	81 e8       	ldi	r24, 0x81	; 129
     18b8:	83 83       	std	Z+3, r24	; 0x03
-    18ba:	80 91 f6 03 	lds	r24, 0x03F6	; 0x8003f6 <__data_end>
-    18be:	90 91 f7 03 	lds	r25, 0x03F7	; 0x8003f7 <__data_end+0x1>
+    18ba:	80 91 d4 03 	lds	r24, 0x03D4	; 0x8003d4 <__data_end>
+    18be:	90 91 d5 03 	lds	r25, 0x03D5	; 0x8003d5 <__data_end+0x1>
     18c2:	89 2b       	or	r24, r25
     18c4:	21 f4       	brne	.+8      	; 0x18ce <fdevopen+0x54>
-    18c6:	f0 93 f7 03 	sts	0x03F7, r31	; 0x8003f7 <__data_end+0x1>
-    18ca:	e0 93 f6 03 	sts	0x03F6, r30	; 0x8003f6 <__data_end>
+    18c6:	f0 93 d5 03 	sts	0x03D5, r31	; 0x8003d5 <__data_end+0x1>
+    18ca:	e0 93 d4 03 	sts	0x03D4, r30	; 0x8003d4 <__data_end>
     18ce:	20 97       	sbiw	r28, 0x00	; 0
     18d0:	c9 f0       	breq	.+50     	; 0x1904 <fdevopen+0x8a>
     18d2:	d1 87       	std	Z+9, r29	; 0x09
@@ -3562,18 +3554,18 @@ buttonData get_button_data() {
     18d6:	83 81       	ldd	r24, Z+3	; 0x03
     18d8:	82 60       	ori	r24, 0x02	; 2
     18da:	83 83       	std	Z+3, r24	; 0x03
-    18dc:	80 91 f8 03 	lds	r24, 0x03F8	; 0x8003f8 <__data_end+0x2>
-    18e0:	90 91 f9 03 	lds	r25, 0x03F9	; 0x8003f9 <__data_end+0x3>
+    18dc:	80 91 d6 03 	lds	r24, 0x03D6	; 0x8003d6 <__data_end+0x2>
+    18e0:	90 91 d7 03 	lds	r25, 0x03D7	; 0x8003d7 <__data_end+0x3>
     18e4:	89 2b       	or	r24, r25
     18e6:	71 f4       	brne	.+28     	; 0x1904 <fdevopen+0x8a>
-    18e8:	f0 93 f9 03 	sts	0x03F9, r31	; 0x8003f9 <__data_end+0x3>
-    18ec:	e0 93 f8 03 	sts	0x03F8, r30	; 0x8003f8 <__data_end+0x2>
-    18f0:	80 91 fa 03 	lds	r24, 0x03FA	; 0x8003fa <__data_end+0x4>
-    18f4:	90 91 fb 03 	lds	r25, 0x03FB	; 0x8003fb <__data_end+0x5>
+    18e8:	f0 93 d7 03 	sts	0x03D7, r31	; 0x8003d7 <__data_end+0x3>
+    18ec:	e0 93 d6 03 	sts	0x03D6, r30	; 0x8003d6 <__data_end+0x2>
+    18f0:	80 91 d8 03 	lds	r24, 0x03D8	; 0x8003d8 <__data_end+0x4>
+    18f4:	90 91 d9 03 	lds	r25, 0x03D9	; 0x8003d9 <__data_end+0x5>
     18f8:	89 2b       	or	r24, r25
     18fa:	21 f4       	brne	.+8      	; 0x1904 <fdevopen+0x8a>
-    18fc:	f0 93 fb 03 	sts	0x03FB, r31	; 0x8003fb <__data_end+0x5>
-    1900:	e0 93 fa 03 	sts	0x03FA, r30	; 0x8003fa <__data_end+0x4>
+    18fc:	f0 93 d9 03 	sts	0x03D9, r31	; 0x8003d9 <__data_end+0x5>
+    1900:	e0 93 d8 03 	sts	0x03D8, r30	; 0x8003d8 <__data_end+0x4>
     1904:	cf 01       	movw	r24, r30
     1906:	df 91       	pop	r29
     1908:	cf 91       	pop	r28
@@ -3594,8 +3586,8 @@ buttonData get_button_data() {
     1924:	61 91       	ld	r22, Z+
     1926:	71 91       	ld	r23, Z+
     1928:	af 01       	movw	r20, r30
-    192a:	80 91 f8 03 	lds	r24, 0x03F8	; 0x8003f8 <__data_end+0x2>
-    192e:	90 91 f9 03 	lds	r25, 0x03F9	; 0x8003f9 <__data_end+0x3>
+    192a:	80 91 d6 03 	lds	r24, 0x03D6	; 0x8003d6 <__data_end+0x2>
+    192e:	90 91 d7 03 	lds	r25, 0x03D7	; 0x8003d7 <__data_end+0x3>
     1932:	0e 94 f0 0c 	call	0x19e0	; 0x19e0 <vfprintf>
     1936:	e2 e0       	ldi	r30, 0x02	; 2
     1938:	0c 94 23 11 	jmp	0x2246	; 0x2246 <__epilogue_restores__+0x20>
@@ -3605,8 +3597,8 @@ buttonData get_button_data() {
     193e:	1f 93       	push	r17
     1940:	cf 93       	push	r28
     1942:	df 93       	push	r29
-    1944:	e0 91 f8 03 	lds	r30, 0x03F8	; 0x8003f8 <__data_end+0x2>
-    1948:	f0 91 f9 03 	lds	r31, 0x03F9	; 0x8003f9 <__data_end+0x3>
+    1944:	e0 91 d6 03 	lds	r30, 0x03D6	; 0x8003d6 <__data_end+0x2>
+    1948:	f0 91 d7 03 	lds	r31, 0x03D7	; 0x8003d7 <__data_end+0x3>
     194c:	23 81       	ldd	r18, Z+3	; 0x03
     194e:	21 ff       	sbrs	r18, 1
     1950:	1b c0       	rjmp	.+54     	; 0x1988 <puts+0x4c>
@@ -3616,8 +3608,8 @@ buttonData get_button_data() {
     1958:	f8 01       	movw	r30, r16
     195a:	81 91       	ld	r24, Z+
     195c:	8f 01       	movw	r16, r30
-    195e:	60 91 f8 03 	lds	r22, 0x03F8	; 0x8003f8 <__data_end+0x2>
-    1962:	70 91 f9 03 	lds	r23, 0x03F9	; 0x8003f9 <__data_end+0x3>
+    195e:	60 91 d6 03 	lds	r22, 0x03D6	; 0x8003d6 <__data_end+0x2>
+    1962:	70 91 d7 03 	lds	r23, 0x03D7	; 0x8003d7 <__data_end+0x3>
     1966:	db 01       	movw	r26, r22
     1968:	18 96       	adiw	r26, 0x08	; 8
     196a:	ed 91       	ld	r30, X+
@@ -4185,8 +4177,8 @@ buttonData get_button_data() {
     1de6:	10 f4       	brcc	.+4      	; 0x1dec <malloc+0x12>
     1de8:	82 e0       	ldi	r24, 0x02	; 2
     1dea:	90 e0       	ldi	r25, 0x00	; 0
-    1dec:	e0 91 fe 03 	lds	r30, 0x03FE	; 0x8003fe <__flp>
-    1df0:	f0 91 ff 03 	lds	r31, 0x03FF	; 0x8003ff <__flp+0x1>
+    1dec:	e0 91 dc 03 	lds	r30, 0x03DC	; 0x8003dc <__flp>
+    1df0:	f0 91 dd 03 	lds	r31, 0x03DD	; 0x8003dd <__flp+0x1>
     1df4:	20 e0       	ldi	r18, 0x00	; 0
     1df6:	30 e0       	ldi	r19, 0x00	; 0
     1df8:	a0 e0       	ldi	r26, 0x00	; 0
@@ -4211,8 +4203,8 @@ buttonData get_button_data() {
     1e1e:	13 96       	adiw	r26, 0x03	; 3
     1e20:	1c 93       	st	X, r17
     1e22:	27 c0       	rjmp	.+78     	; 0x1e72 <malloc+0x98>
-    1e24:	00 93 fe 03 	sts	0x03FE, r16	; 0x8003fe <__flp>
-    1e28:	10 93 ff 03 	sts	0x03FF, r17	; 0x8003ff <__flp+0x1>
+    1e24:	00 93 dc 03 	sts	0x03DC, r16	; 0x8003dc <__flp>
+    1e28:	10 93 dd 03 	sts	0x03DD, r17	; 0x8003dd <__flp+0x1>
     1e2c:	22 c0       	rjmp	.+68     	; 0x1e72 <malloc+0x98>
     1e2e:	21 15       	cp	r18, r1
     1e30:	31 05       	cpc	r19, r1
@@ -4243,8 +4235,8 @@ buttonData get_button_data() {
     1e62:	93 83       	std	Z+3, r25	; 0x03
     1e64:	82 83       	std	Z+2, r24	; 0x02
     1e66:	04 c0       	rjmp	.+8      	; 0x1e70 <malloc+0x96>
-    1e68:	90 93 ff 03 	sts	0x03FF, r25	; 0x8003ff <__flp+0x1>
-    1e6c:	80 93 fe 03 	sts	0x03FE, r24	; 0x8003fe <__flp>
+    1e68:	90 93 dd 03 	sts	0x03DD, r25	; 0x8003dd <__flp+0x1>
+    1e6c:	80 93 dc 03 	sts	0x03DC, r24	; 0x8003dc <__flp>
     1e70:	fe 01       	movw	r30, r28
     1e72:	32 96       	adiw	r30, 0x02	; 2
     1e74:	44 c0       	rjmp	.+136    	; 0x1efe <malloc+0x124>
@@ -4258,14 +4250,14 @@ buttonData get_button_data() {
     1e84:	39 83       	std	Y+1, r19	; 0x01
     1e86:	28 83       	st	Y, r18
     1e88:	3a c0       	rjmp	.+116    	; 0x1efe <malloc+0x124>
-    1e8a:	20 91 fc 03 	lds	r18, 0x03FC	; 0x8003fc <__brkval>
-    1e8e:	30 91 fd 03 	lds	r19, 0x03FD	; 0x8003fd <__brkval+0x1>
+    1e8a:	20 91 da 03 	lds	r18, 0x03DA	; 0x8003da <__brkval>
+    1e8e:	30 91 db 03 	lds	r19, 0x03DB	; 0x8003db <__brkval+0x1>
     1e92:	23 2b       	or	r18, r19
     1e94:	41 f4       	brne	.+16     	; 0x1ea6 <malloc+0xcc>
     1e96:	20 91 06 01 	lds	r18, 0x0106	; 0x800106 <__malloc_heap_start>
     1e9a:	30 91 07 01 	lds	r19, 0x0107	; 0x800107 <__malloc_heap_start+0x1>
-    1e9e:	30 93 fd 03 	sts	0x03FD, r19	; 0x8003fd <__brkval+0x1>
-    1ea2:	20 93 fc 03 	sts	0x03FC, r18	; 0x8003fc <__brkval>
+    1e9e:	30 93 db 03 	sts	0x03DB, r19	; 0x8003db <__brkval+0x1>
+    1ea2:	20 93 da 03 	sts	0x03DA, r18	; 0x8003da <__brkval>
     1ea6:	20 91 04 01 	lds	r18, 0x0104	; 0x800104 <__malloc_heap_end>
     1eaa:	30 91 05 01 	lds	r19, 0x0105	; 0x800105 <__malloc_heap_end+0x1>
     1eae:	21 15       	cp	r18, r1
@@ -4277,8 +4269,8 @@ buttonData get_button_data() {
     1ebc:	50 91 09 01 	lds	r21, 0x0109	; 0x800109 <__malloc_margin+0x1>
     1ec0:	24 1b       	sub	r18, r20
     1ec2:	35 0b       	sbc	r19, r21
-    1ec4:	e0 91 fc 03 	lds	r30, 0x03FC	; 0x8003fc <__brkval>
-    1ec8:	f0 91 fd 03 	lds	r31, 0x03FD	; 0x8003fd <__brkval+0x1>
+    1ec4:	e0 91 da 03 	lds	r30, 0x03DA	; 0x8003da <__brkval>
+    1ec8:	f0 91 db 03 	lds	r31, 0x03DB	; 0x8003db <__brkval+0x1>
     1ecc:	e2 17       	cp	r30, r18
     1ece:	f3 07       	cpc	r31, r19
     1ed0:	a0 f4       	brcc	.+40     	; 0x1efa <malloc+0x120>
@@ -4295,8 +4287,8 @@ buttonData get_button_data() {
     1ee6:	48 f0       	brcs	.+18     	; 0x1efa <malloc+0x120>
     1ee8:	4e 0f       	add	r20, r30
     1eea:	5f 1f       	adc	r21, r31
-    1eec:	50 93 fd 03 	sts	0x03FD, r21	; 0x8003fd <__brkval+0x1>
-    1ef0:	40 93 fc 03 	sts	0x03FC, r20	; 0x8003fc <__brkval>
+    1eec:	50 93 db 03 	sts	0x03DB, r21	; 0x8003db <__brkval+0x1>
+    1ef0:	40 93 da 03 	sts	0x03DA, r20	; 0x8003da <__brkval>
     1ef4:	81 93       	st	Z+, r24
     1ef6:	91 93       	st	Z+, r25
     1ef8:	02 c0       	rjmp	.+4      	; 0x1efe <malloc+0x124>
@@ -4319,21 +4311,21 @@ buttonData get_button_data() {
     1f16:	32 97       	sbiw	r30, 0x02	; 2
     1f18:	13 82       	std	Z+3, r1	; 0x03
     1f1a:	12 82       	std	Z+2, r1	; 0x02
-    1f1c:	a0 91 fe 03 	lds	r26, 0x03FE	; 0x8003fe <__flp>
-    1f20:	b0 91 ff 03 	lds	r27, 0x03FF	; 0x8003ff <__flp+0x1>
+    1f1c:	a0 91 dc 03 	lds	r26, 0x03DC	; 0x8003dc <__flp>
+    1f20:	b0 91 dd 03 	lds	r27, 0x03DD	; 0x8003dd <__flp+0x1>
     1f24:	10 97       	sbiw	r26, 0x00	; 0
     1f26:	81 f4       	brne	.+32     	; 0x1f48 <free+0x3e>
     1f28:	20 81       	ld	r18, Z
     1f2a:	31 81       	ldd	r19, Z+1	; 0x01
     1f2c:	82 0f       	add	r24, r18
     1f2e:	93 1f       	adc	r25, r19
-    1f30:	20 91 fc 03 	lds	r18, 0x03FC	; 0x8003fc <__brkval>
-    1f34:	30 91 fd 03 	lds	r19, 0x03FD	; 0x8003fd <__brkval+0x1>
+    1f30:	20 91 da 03 	lds	r18, 0x03DA	; 0x8003da <__brkval>
+    1f34:	30 91 db 03 	lds	r19, 0x03DB	; 0x8003db <__brkval+0x1>
     1f38:	28 17       	cp	r18, r24
     1f3a:	39 07       	cpc	r19, r25
     1f3c:	51 f5       	brne	.+84     	; 0x1f92 <free+0x88>
-    1f3e:	f0 93 fd 03 	sts	0x03FD, r31	; 0x8003fd <__brkval+0x1>
-    1f42:	e0 93 fc 03 	sts	0x03FC, r30	; 0x8003fc <__brkval>
+    1f3e:	f0 93 db 03 	sts	0x03DB, r31	; 0x8003db <__brkval+0x1>
+    1f42:	e0 93 da 03 	sts	0x03DA, r30	; 0x8003da <__brkval>
     1f46:	67 c0       	rjmp	.+206    	; 0x2016 <free+0x10c>
     1f48:	ed 01       	movw	r28, r26
     1f4a:	20 e0       	ldi	r18, 0x00	; 0
@@ -4372,8 +4364,8 @@ buttonData get_button_data() {
     1f8c:	21 15       	cp	r18, r1
     1f8e:	31 05       	cpc	r19, r1
     1f90:	29 f4       	brne	.+10     	; 0x1f9c <free+0x92>
-    1f92:	f0 93 ff 03 	sts	0x03FF, r31	; 0x8003ff <__flp+0x1>
-    1f96:	e0 93 fe 03 	sts	0x03FE, r30	; 0x8003fe <__flp>
+    1f92:	f0 93 dd 03 	sts	0x03DD, r31	; 0x8003dd <__flp+0x1>
+    1f96:	e0 93 dc 03 	sts	0x03DC, r30	; 0x8003dc <__flp>
     1f9a:	3d c0       	rjmp	.+122    	; 0x2016 <free+0x10c>
     1f9c:	e9 01       	movw	r28, r18
     1f9e:	fb 83       	std	Y+3, r31	; 0x03
@@ -4416,20 +4408,20 @@ buttonData get_button_data() {
     1fe8:	3f 4f       	sbci	r19, 0xFF	; 255
     1fea:	82 0f       	add	r24, r18
     1fec:	93 1f       	adc	r25, r19
-    1fee:	20 91 fc 03 	lds	r18, 0x03FC	; 0x8003fc <__brkval>
-    1ff2:	30 91 fd 03 	lds	r19, 0x03FD	; 0x8003fd <__brkval+0x1>
+    1fee:	20 91 da 03 	lds	r18, 0x03DA	; 0x8003da <__brkval>
+    1ff2:	30 91 db 03 	lds	r19, 0x03DB	; 0x8003db <__brkval+0x1>
     1ff6:	28 17       	cp	r18, r24
     1ff8:	39 07       	cpc	r19, r25
     1ffa:	69 f4       	brne	.+26     	; 0x2016 <free+0x10c>
     1ffc:	30 97       	sbiw	r30, 0x00	; 0
     1ffe:	29 f4       	brne	.+10     	; 0x200a <free+0x100>
-    2000:	10 92 ff 03 	sts	0x03FF, r1	; 0x8003ff <__flp+0x1>
-    2004:	10 92 fe 03 	sts	0x03FE, r1	; 0x8003fe <__flp>
+    2000:	10 92 dd 03 	sts	0x03DD, r1	; 0x8003dd <__flp+0x1>
+    2004:	10 92 dc 03 	sts	0x03DC, r1	; 0x8003dc <__flp>
     2008:	02 c0       	rjmp	.+4      	; 0x200e <free+0x104>
     200a:	13 82       	std	Z+3, r1	; 0x03
     200c:	12 82       	std	Z+2, r1	; 0x02
-    200e:	b0 93 fd 03 	sts	0x03FD, r27	; 0x8003fd <__brkval+0x1>
-    2012:	a0 93 fc 03 	sts	0x03FC, r26	; 0x8003fc <__brkval>
+    200e:	b0 93 db 03 	sts	0x03DB, r27	; 0x8003db <__brkval+0x1>
+    2012:	a0 93 da 03 	sts	0x03DA, r26	; 0x8003da <__brkval>
     2016:	df 91       	pop	r29
     2018:	cf 91       	pop	r28
     201a:	08 95       	ret

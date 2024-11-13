@@ -2,6 +2,7 @@
 #include "fonts.h"
 
 void OLED_init() {
+	//hentet fra datablad
 	xmem_write(0xae, COMMAND_OFFSET); // display off
 	xmem_write(0xa1, COMMAND_OFFSET); //segment remap
 	xmem_write(0xda, COMMAND_OFFSET); //common pads hardware: alternative
@@ -45,7 +46,6 @@ void OLED_write_data(char c, int invert) {
 	int index = ((int) c) - 32;
 	for (int i = 0; i < 8; i++) {
 		if (invert) {
-			//xmem_write(0b11111111, DATA_OFFSET);
 			xmem_write(~pgm_read_byte(&(font8[index][i])), DATA_OFFSET);
 		} else {
 			xmem_write(pgm_read_byte(&(font8[index][i])), DATA_OFFSET);
@@ -78,7 +78,6 @@ void OLED_print_screen(screen_data wanted_screen) {
 
 void OLED_go_to_line(int line)
 {
-	//unsigned char lines[] = {0xb3, 0xb4, 0xb5, 0xb6, 0xb7, 0xb0, 0xb1, 0xb2};
 	unsigned char lines[] = {0xb0, 0xb1, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6, 0xb7};
 	xmem_write(lines[line], COMMAND_OFFSET);
 }
@@ -87,201 +86,6 @@ void OLED_clear_line(int line)
 {
 	OLED_go_to_line(line);
 	OLED_print("                ");
-}
-
-SCREEN_GUI OLED_sub_menu(signedPos offset)
-{
-	OLED_clear();
-	
-	screen_data menu;
-	menu[0] = "                ";
-	menu[1] = "                ";
-	menu[2] = "   Start Game   ";
-	menu[3] = "                ";
-	menu[4] = "  Back to Home  ";
-	menu[5] = "                ";
-	menu[6] = "                ";
-	menu[7] = "                ";
-	
-	OLED_print_screen(menu);
-	
-	int selected = 0;
-	int should_move = false;
-	int sleep = 0;
-	
-	while(1)
-	{
-		if (sleep > 10000) {
-			JOYSTICKPOS P = get_discrete_direction(offset);
-			
-			if (should_move) {
-				if (P == UP) {
-					OLED_print(menu[selected]);
-					if (selected > 0) {
-						selected--;
-					}
-					else {
-						selected = 7;
-					}
-				}
-				else if (P == DOWN) {
-					OLED_print(menu[selected]);
-					if (selected < 7) {
-						selected++;
-					}
-					else {
-						selected = 0;
-					}
-				}
-				OLED_go_to_line(selected);
-				OLED_print_invert(menu[selected]);
-				should_move = false;
-			}
-			if (P == NEUTRAL) {
-				should_move = true;
-				buttonData buttons = get_button_data();
-
-				if (buttons.joy_button && selected == 4)
-				{
-					return HOME;
-				}
-			}
-			
-			//printf("%d", (int) P);
-			
-			sleep = 0;
-		}
-		sleep++;
-	}
-}
-
-//SCREEN_GUI OLED_home(signedPos offset)
-//{	
-	//screen_data menu;
-	//menu[0] = "----------------";
-	//menu[1] = "                ";
-	//menu[2] = "  Welcome home  ";
-	//menu[3] = "                ";
-	//menu[4] = "      Menu      ";
-	//menu[5] = "                ";
-	//menu[6] = "                ";
-	//menu[7] = "----------------";
-	//
-	//OLED_print_screen(menu);
-//
-	//int selected = 0;
-	//int should_move = false;
-	//int sleep = 0;
-	//
-	//while(1)
-	//{
-		//if (sleep > 10000) {	
-			//JOYSTICKPOS P = get_discrete_direction(offset);
-		//
-			//if (should_move) {
-				//if (P == UP) {
-					//OLED_print(menu[selected]);
-					//if (selected > 0) {
-						//selected--;
-					//}
-					//else {
-						//selected = 7;
-					//}
-				//}
-				//else if (P == DOWN) {
-					//OLED_print(menu[selected]);
-					//if (selected < 7) {
-						//selected++;
-					//}
-					//else {
-						//selected = 0;
-					//}
-				//}
-				//OLED_go_to_line(selected);
-				//OLED_print_invert(menu[selected]);
-				//should_move = false;
-			//}
-			//if (P == NEUTRAL) {
-				//should_move = true;
-				//buttonData buttons = get_button_data();
-//
-				//if (buttons.joy_button && selected == 4)
-				//{
-					//return MENU;
-				//}
-			//}
-		//
-			////printf("%d", (int) P);
-			//
-			//sleep = 0;
-		//}
-		//sleep++;
-	//}
-	//
-//}
-SCREEN_GUI OLED_home(signedPos offset, int wanted_pos[])
-{
-	screen_data menu;
-	menu[0] = "----------------";
-	menu[1] = "                ";
-	menu[2] = "  Welcome home  ";
-	menu[3] = "                ";
-	menu[4] = "      Menu      ";
-	menu[5] = "                ";
-	menu[6] = "                ";
-	menu[7] = "----------------";
-	
-	OLED_print_screen(menu);
-
-	int selected = 0;
-	int should_move = false;
-	int sleep = 0;
-	
-	while(1)
-	{
-		if (sleep > 10000) {
-			JOYSTICKPOS P = get_discrete_direction(offset);
-			
-			if (should_move) {
-				if (P == UP) {
-					OLED_print(menu[wanted_pos[selected]]);
-					if (selected > 0) {
-						selected--;
-					}
-					else {
-						selected = sizeof(wanted_pos);
-					}
-				}
-				else if (P == DOWN) {
-					OLED_print(menu[wanted_pos[selected]]);
-					if (selected < sizeof(wanted_pos)) {
-						selected++;
-					}
-					else {
-						selected = 0;
-					}
-				}
-				OLED_go_to_line(wanted_pos[selected]);
-				OLED_print_invert(wanted_pos[selected]);
-				should_move = false;
-			}
-			if (P == NEUTRAL) {
-				should_move = true;
-				buttonData buttons = get_button_data();
-
-				if (buttons.joy_button && wanted_pos[selected] == 4)
-				{
-					return MENU;
-				}
-			}
-			
-			//printf("%d", (int) P);
-			
-			sleep = 0;
-		}
-		sleep++;
-	}
-	
 }
 
 
@@ -297,7 +101,6 @@ int OLED_menu(signedPos offset, screen_data screen, int wanted_pos[], SCREEN_GUI
 	if (gui == GAME)
 	{	
 		mcp2515_bit_modify(MCP_CANINTF, (1 << 0), (0 << 0));
-		//printf("0x%x\n", mcp2515_read(MCP_CANINTF));
 		while(1)
 		{	
 			if (sleep > 10000) {
@@ -306,18 +109,8 @@ int OLED_menu(signedPos offset, screen_data screen, int wanted_pos[], SCREEN_GUI
 					mcp2515_bit_modify(MCP_CANINTF, (1 << 0), (0 << 0));
 					return 6;
 				}
-// 				CAN_message receive_msg = mcp2515_read_mult_RX(RX1);
-// 				printf("%d\n", receive_msg.id);
-// //  				if(((int) receive_msg.id) == 2)
-// // 				//if (1 == 2)
-// //  				{
-// //  					printf("død\n");
-// // 					break;
-// //  				}
 				signedPos Joystick = get_percent_pos(get_board_data(), offset);
 				int joy_button = get_button_data().joy_button;
-				//char m[8] = {3, 4};//{Joystick.X, Joystick.Y};
-				/*CAN_message msg = (3, 2, (char){(char)Joystick.X, (char)Joystick.Y});*/
 				CAN_message msg = {3, 3, {(char) Joystick.X, (char) Joystick.Y, (char) joy_button}};
 				mcp2515_load_mult_TX(TX0, msg);
 				mcp2515_request_to_send(TX0);
@@ -441,8 +234,7 @@ void OLED_run(signedPos offset) {
 			printf("%d", pos);
 			if(pos == 4) {
 				gui = MENU;
-			}
-			//gui = OLED_home(offset, wanted_pos);  //including while loop returning new condition			
+			}		
 		}
 		
 		printf("%d", gui);
@@ -488,17 +280,14 @@ void OLED_run(signedPos offset) {
 			if (score < 10)
 			{
 				sprintf(game_over[4], "       -%d-      ", score);
-				//screen[6] = {' ', ' ', ' ', ' ', ' ', "        " + (char*)score + "       ";
 			}
 			else if (score < 100)
 			{
 				sprintf(game_over[4], "       -%d-     ", score);
-				//screen[6] = "        " + (char*)score + "      ";
 			}
 			else if (score < 1000)
 			{
 				sprintf(game_over[4], "      -%d-     ", score);
-				//screen[6] = "       " + (char*)score + "      ";
 			}
 			
 			int pos = OLED_menu(offset, game_over, wanted_pos_game, gui);

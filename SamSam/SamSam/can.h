@@ -96,8 +96,6 @@ void can_printmsg(CanMsg m);
 
 void can_print_signed_msg(CanMsg m);
 
-void CAN0_Handler(void);
-
 
 
 

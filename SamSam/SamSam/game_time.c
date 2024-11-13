@@ -3,8 +3,6 @@
 #include "sam.h"
 
 void updateJoystickPos(CanMsg m, SignedTuple* joyPos) {
-	//SignedTuple a = {m.byte[0], m.byte[1]};
-	//return (SignedTuple){m.byte[0], m.byte[1]};
 	joyPos->X = m.byte[0];
 	joyPos->Y = m.byte[1];
 }
@@ -20,24 +18,20 @@ int detectHit(uint16_t config) {
 
 void runGame(int lifes) {
 	CanMsg JoyMSG;
-	int sleep = 0;
 	int hitFlag = 0;
-	//printf("calibrate encoder %d\n", calibrate_encoder());
 	uint16_t adc_config = get_adc_data();
-	
 	SignedTuple JoyPos = {0, 0, 1};
+	PID_data data = {0};
 	
-	PID_data data = {get_time(), 0};
-		
+	//Config real time timer
 	RTT->RTT_MR |= (1 << 18);
+	
 	while(1) {
 		if (can_rx(&JoyMSG))
 		{
 			updateJoystickPos(JoyMSG, &JoyPos);
 			int joy_btn = JoyMSG.byte[2];
-			//printf("%d\n", joy_btn);
 			control_servo(JoyPos.Y);
-			//control_motor_speed(JoyPos.X);
 			activate_solenoid(joy_btn);
 			
 		}
@@ -49,17 +43,7 @@ void runGame(int lifes) {
 		}
 		
 		
-		//printf("%d\n",  (int) ((double) get_time() / 656250.0));
-		
-		if (sleep > 500000) {
-			//printf("adc: %d\n", get_adc_data());
-			//printf("encoder: %d\n", read_encoder());
-			//printf("time %d\n", get_time() / 100);
-			sleep = 0;
-		}
-		sleep++;
-		
-		if (detectHit(adc_config) && !hitFlag) {  //Bør legge til et flagg her
+		if (detectHit(adc_config) && !hitFlag) {
 			lifes--;
 			hitFlag = 1;
 		}
@@ -72,7 +56,6 @@ void runGame(int lifes) {
 			control_motor_speed(0);
 			int score = RTT->RTT_VR;  //read from real time timer register
  			CanMsg game_over = {1, 1, {score}};
- 			printf("Score: %d\n", score);
  			can_tx(game_over);
  			return;
 		}
@@ -99,10 +82,8 @@ uint32_t get_time() {
 void PID_controller(int encoder_pos, int ref, PID_data* Data) {
 	
 	float e = (-ref + 100) * ENCODER_STEPS / 200 - encoder_pos;
-	//printf("e: %f\n", e);
 	
 	Data->error_sum += (int32_t) e;
-	Data->time = get_time();
 	
 	if (Data->error_sum > MAX_ERROR_SUM) {
 		Data->error_sum = MAX_ERROR_SUM;
@@ -111,8 +92,6 @@ void PID_controller(int encoder_pos, int ref, PID_data* Data) {
 	}
 	
 	float u = K_p * e + K_i * PERIOD * (double) Data->error_sum;
-	
-	//printf("u: %f\n", u);
 	
 	if(u > 100.0) {
 		u = 100.0;

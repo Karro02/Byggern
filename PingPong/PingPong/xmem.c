@@ -18,7 +18,6 @@ void xmem_init() {
 	//Buttons
 	DDRB |= 0 << DDB2 | 0 << DDB1 | 0 << DDB0; 
 	PORTB |= 1 << PB1;
-	//EMCUCR = 0 << SRW10 | 0 << SRW11;
 	
 
 }

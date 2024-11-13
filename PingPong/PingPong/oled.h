@@ -25,9 +25,6 @@ void OLED_print_invert(char* word);
 void OLED_print_screen(screen_data wanted_screen);
 void OLED_go_to_line(int line);
 void OLED_clear_line(int line);
-//SCREEN_GUI OLED_home(signedPos offset);
-SCREEN_GUI OLED_home(signedPos offset, int wanted_pos[]);
-SCREEN_GUI OLED_sub_menu(signedPos offset);
 
 int OLED_menu(signedPos offset, screen_data screen, int wanted_pos[], SCREEN_GUI gui);
 void OLED_run(signedPos offset);

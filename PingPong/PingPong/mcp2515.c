@@ -1,6 +1,7 @@
 #include "mcp2515.h"
 #include "spi.h"
 
+
 uint8_t mcp2515_init() {
 	uint8_t value;
 	SPI_MasterInit(); // Initialize SPI
@@ -21,12 +22,6 @@ uint8_t mcp2515_init() {
 	mcp2515_write(MCP_CNF2, (BTLMODE | SAMPLE_1X | PS1_7 | PROPSEG_1)); //Enable manually set of PS2 in CNF3, Sample once at sample point, PS1 = PROPSEG = 4 * Tq
 	mcp2515_write(MCP_CNF3, (WAKFIL_ENABLE | PS2_6)); //Enable Wake_up filter, PS2 = 4 * Tq
 	
-	//trenger kanskje tx og mask register
-	//uint8_t current_cmd = mcp2515_read(MCP_RXB0CTRL);
-	//mcp2515_write(MCP_RXB0CTRL, current_cmd | (0b11 << 5));
-	//
-	//current_cmd = mcp2515_read(MCP_RXB1CTRL);
-	//mcp2515_write(MCP_RXB1CTRL, current_cmd | (0b11 << 5));
 	
 	//Godkjent ID for RX0 = 1, RX1 godkjenner alt
 	mcp2515_bit_modify(MCP_RXB0CTRL, 0x60, 0x20); //current_cmd | (0b01 << 5));   //Turn mask/filters off, accept all messages
@@ -35,12 +30,6 @@ uint8_t mcp2515_init() {
 	mcp2515_bit_modify(MCP_RXM0SIDL, 0xE0, 0xE0);
 	mcp2515_bit_modify(MCP_RXM0SIDH, 0xFF, 0xFF);
 	mcp2515_bit_modify(MCP_RXB0CTRL, 0x01, 0x0);
-	
-	//mcp2515_bit_modify(MCP_RXB0CTRL, 0x60, 0x30);
-	
-	//Enable loopBack mode
-	//mcp2515_set_mode(MODE_LOOPBACK);
-	
 	
 	return 0;
 }
@@ -94,10 +83,7 @@ void mcp2515_request_to_send(TXBUFFER buffer) {
 			break;
 		case TX2:
 			SPI_MasterWrite(MCP_RTS_TX2);
-			break;
-		//case ALL:
-			//SPI_MasterWrite(MCP_RTS_ALL);
-			//break;		
+			break;		
 	} 
 	
 	PORTB |= (1 << CAN_CS); // Deselect CAN - controller
@@ -136,19 +122,13 @@ uint8_t rx_receive_message(uint8_t RxBn){
 	mcp2515_write(RxBn+0x1, 0x8);
 	mcp2515_write(RxBn+0x2, 0x20);
 	mcp2515_write(RxBn+0x5, 0x8);
-	//PORTB &= ~(1 << CAN_CS);
-	//SPI_MasterWrite(0b10010010);
-	//uint8_t data = SPI_MasterRead();
 	uint8_t data = mcp2515_read(RxBn + 0x06);
-	//PORTB |= (1 << CAN_CS);
 	return data;
 }
 
 void mcp2515_load_TX(TXBUFFER buffer, uint8_t data, uint16_t id) {
-	//PORTB &= ~(1 << CAN_CS); // Select CAN - controller
 	switch (buffer) {
 		case TX0:
-			//tx_transmit_message(0x30, data);
 			mcp2515_write(MCP_TXB0CTRL + 0x01, id >> 3);	//SIDH (Standard identifier high)
 			mcp2515_write(MCP_TXB0CTRL + 0x02, (id && 0b00000111) << 5);	//SIDL (Standard identifier low)
 			mcp2515_write(MCP_TXB0CTRL+0x05, 0x1);	//data length in bytes
@@ -171,11 +151,7 @@ void mcp2515_load_TX(TXBUFFER buffer, uint8_t data, uint16_t id) {
 			break;
 	}
 	SPI_MasterWrite(data);
-	//SPI_MasterWrite(0x55);  //bare å write flere ganger for å skrive mer en en byte data
 	PORTB |= (1 << CAN_CS); // Deselect CAN - controller
-	
-	//mcp2515_write(MCP_TXB0CTRL + 0x01, 0x0);
-	//mcp2515_write(MCP_TXB0CTRL + 0x02, 0x20);
 	
 }
 
@@ -197,7 +173,6 @@ uint8_t mcp2515_read_RX(RXBUFFER buffer) {
 void mcp2515_load_mult_TX(TXBUFFER buffer, CAN_message message) {
 	switch (buffer) {
 		case TX0:
-			//tx_transmit_message(0x30, data);
 			mcp2515_write(MCP_TXB0CTRL + 0x01, message.id >> 3);	//SIDH (Standard identifier high)
 			mcp2515_write(MCP_TXB0CTRL + 0x02, (message.id && 0b00000111) << 5);	//SIDL (Standard identifier low)
 			mcp2515_write(MCP_TXB0CTRL+0x05, message.data_length);	//data length in bytes
@@ -224,7 +199,6 @@ void mcp2515_load_mult_TX(TXBUFFER buffer, CAN_message message) {
 		SPI_MasterWrite(message.data[i]);
 	}
 	
-	//SPI_MasterWrite(0x55);  //bare å write flere ganger for å skrive mer en en byte data
 	PORTB |= (1 << CAN_CS); // Deselect CAN - controller
 }
 CAN_message mcp2515_read_mult_RX(RXBUFFER buffer) {
@@ -232,13 +206,11 @@ CAN_message mcp2515_read_mult_RX(RXBUFFER buffer) {
 	uint8_t len;
 	switch (buffer) {
 		case RX0:
-			//mcp2515_write(MCP_RXB0CTRL + 0x05, len);
 			len = mcp2515_read(MCP_RXB0CTRL + 0x05); //Read from DLC
 			PORTB &= ~(1 << CAN_CS); // Select CAN - controller
 			SPI_MasterWrite(MCP_READ_RX0 + 0x02);
 			break;
 		case RX1:
-			//mcp2515_write(MCP_RXB1CTRL + 0x05, len);
 			len = mcp2515_read(MCP_RXB1CTRL + 0x05); //Read from DLC
 			PORTB &= ~(1 << CAN_CS); // Select CAN - controller
 			SPI_MasterWrite(MCP_READ_RX1 + 0x02);
@@ -250,7 +222,6 @@ CAN_message mcp2515_read_mult_RX(RXBUFFER buffer) {
 		message.data[i] = SPI_MasterRead();
 	}
 	PORTB |= (1 << CAN_CS); // Deselect CAN - controller
-// 	CAN_message message = {1, len, data};
 	message.data_length = len;
 	message.id = 1;
 	return message;
@@ -261,19 +232,15 @@ void mcp2515_test_loopBack() {
 	printf("Mode: 0x%02X\n", mcp2515_read(MCP_CANCTRL));
 	TXBUFFER test_buffer = TX1;
 	RXBUFFER read_buffer = RX1;
-	//tx_transmit_message(0x30, 0xac);
 	for (int i = 0; i < 10; i++) {
 		
 		mcp2515_load_TX(test_buffer, 0x00 + 2 + i, 11);
 		mcp2515_request_to_send(test_buffer);
 		uint8_t data = mcp2515_read_RX(read_buffer);
-		//uint8_t data = rx_receive_message(0b01100000);
 		printf("Data: 0x%02X\n", data);
 	}
 	
-	/*CAN_message test = {1, 8, "abcdefgh"};*/
 	CAN_message test = {11, 8, "kileraaa"};
-	//CAN_message test = {11, 1, "r"};
 		
 	mcp2515_load_mult_TX(test_buffer, test);
 
