@@ -13,7 +13,7 @@ void motor_init();
 
 void set_motor_direction(uint8_t dir);
 
-void control_motor_speed(int pos); //between -100 and 100
+void control_motor_speed(float speed); //between -100 and 100
 
 void encoder_init();
 
@@ -24,3 +24,4 @@ void solenoid_init();
 void activate_solenoid(int joy_btn);
 
 uint32_t calibrate_encoder();
+

@@ -28,11 +28,13 @@ int main(void)
 	motor_init();
 	encoder_init();
 	solenoid_init();
+	timer_init();
 	
 	int a = 1;
+	CanMsg start;
 	while(1) {
 		
-		if (a) { //kjøre denne når vi får en medling
+		if (can_rx(&start)) { //kjøre denne når vi får en melding
 			runGame(2);
 			a = 0;
 		}
@@ -80,15 +82,6 @@ void oldTests() {
 	
 	
 	
-	while(0)
-	{
-		if (can_rx(&test))
-		{
-			SignedTuple a = getJoystickPos(test);
-			printf("X: %d Y: %d\n", a.X, a.Y);
-			//can_print_signed_msg(test);
-		}
-	}
 	while (0)
 	{
 		int sleep = 0;

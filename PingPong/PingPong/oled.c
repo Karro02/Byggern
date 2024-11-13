@@ -286,8 +286,8 @@ SCREEN_GUI OLED_home(signedPos offset, int wanted_pos[])
 
 
 int OLED_menu(signedPos offset, screen_data screen, int wanted_pos[], SCREEN_GUI gui) {
-	OLED_print_screen(screen);
 
+	OLED_print_screen(screen);
 	int selected = wanted_pos[0];
 	int should_move = false;
 	int sleep = 0;
@@ -295,18 +295,25 @@ int OLED_menu(signedPos offset, screen_data screen, int wanted_pos[], SCREEN_GUI
 	int wanted_index = 0;
 	
 	if (gui == GAME)
-	{
+	{	
+		mcp2515_bit_modify(MCP_CANINTF, (1 << 0), (0 << 0));
+		//printf("0x%x\n", mcp2515_read(MCP_CANINTF));
 		while(1)
 		{	
 			if (sleep > 10000) {
-				CAN_message receive_msg = mcp2515_read_mult_RX(RX1);
-				printf("%d\n", receive_msg.id);
-//  				if(((int) receive_msg.id) == 2)
-// 				//if (1 == 2)
-//  				{
-//  					printf("død\n");
-// 					break;
-//  				}
+				if (mcp2515_read(MCP_CANINTF) & (1 << 0)) {
+					printf("dod\n");
+					mcp2515_bit_modify(MCP_CANINTF, (1 << 0), (0 << 0));
+					return 6;
+				}
+// 				CAN_message receive_msg = mcp2515_read_mult_RX(RX1);
+// 				printf("%d\n", receive_msg.id);
+// //  				if(((int) receive_msg.id) == 2)
+// // 				//if (1 == 2)
+// //  				{
+// //  					printf("død\n");
+// // 					break;
+// //  				}
 				signedPos Joystick = get_percent_pos(get_board_data(), offset);
 				int joy_button = get_button_data().joy_button;
 				//char m[8] = {3, 4};//{Joystick.X, Joystick.Y};
@@ -417,8 +424,11 @@ void OLED_run(signedPos offset) {
 	game[3] = "     Running    ";
 	game[4] = "                ";
 	game[5] = "                ";
-	game[6] = "      Exit      ";
+	game[6] = "                ";
 	game[7] = "                ";
+	
+	screen_data game_over;
+	
 	
 	int wanted_pos_game[] = {6, 6};
 	while (1) {
@@ -458,6 +468,40 @@ void OLED_run(signedPos offset) {
 			
 			
 			int pos = OLED_menu(offset, game, wanted_pos_game, gui);
+			printf("%d", pos);
+			if(pos == 6) {
+				gui = GAME_OVER;
+			}
+			
+		}
+		if (gui == GAME_OVER)
+		{
+			game_over[0] = "                ";
+			game_over[1] = "       :(       ";
+			game_over[2] = "    Game Over   ";
+			game_over[3] = "     Score:     ";
+			game_over[5] = "                ";
+			game_over[6] = "      Exit      ";
+			game_over[7] = "                ";
+			uint8_t score = mcp2515_read_RX(RX0);
+			
+			if (score < 10)
+			{
+				sprintf(game_over[4], "       -%d-      ", score);
+				//screen[6] = {' ', ' ', ' ', ' ', ' ', "        " + (char*)score + "       ";
+			}
+			else if (score < 100)
+			{
+				sprintf(game_over[4], "       -%d-     ", score);
+				//screen[6] = "        " + (char*)score + "      ";
+			}
+			else if (score < 1000)
+			{
+				sprintf(game_over[4], "      -%d-     ", score);
+				//screen[6] = "       " + (char*)score + "      ";
+			}
+			
+			int pos = OLED_menu(offset, game_over, wanted_pos_game, gui);
 			printf("%d", pos);
 			if(pos == 6) {
 				gui = MENU;

@@ -88,12 +88,15 @@ void set_motor_direction(uint8_t dir) {
 	}
 }
 
-void control_motor_speed(int speed) {
+void control_motor_speed(float speed) {
 	
 	//float dt = ((float) (-pos + 100.0)) / 200.0 * (float) 0x3345;
 	//float new_dt = ((float) (-pos + 100)) / 200.0;
-	set_motor_direction(speed > 0);
-	speed = abs(speed);
+	set_motor_direction(speed > 0.0);
+	if (speed < 0.0) {
+		speed = -speed;
+	}
+	//printf("s: %f\n", speed);
 	float new_dt = (float) speed / 100.0;
 	if (new_dt < 0.0) {
 		new_dt = 0.0;
@@ -101,6 +104,7 @@ void control_motor_speed(int speed) {
 	if (new_dt >= 1.0) {
 		new_dt = 0.99;
 	}
+	//printf("d: %f\n", new_dt);
 	//int dt = (1.0 + new_dt) * ((float) 0x3d8 / 1.5);
 	int dt = new_dt * ((float) 0x3345);
 	REG_PWM_CDTYUPD0 = (int) dt;
@@ -115,7 +119,7 @@ void encoder_init() {
 	//PMC->PMC_PCER0 |= (1 << ID_PIOC);
 	
 	//Enable TC2 channel 0
-	PMC->PMC_PCER1 |= (1 << ID_TC6 - 32);
+	PMC->PMC_PCER1 |= (1 << (ID_TC6 - 32));
 	
 	// Select B peripheral on PC25 (encoder input)
 	//PIOC->PIO_OER |= (1 << 25);
@@ -173,6 +177,7 @@ uint32_t calibrate_encoder() {
 		new_enc = read_encoder();
 	}
 	uint32_t max_enc = old_enc;
-	
+	control_motor_speed(0);
 	return (abs(max_enc - min_enc))/2;
 }
+

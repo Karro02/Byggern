@@ -11,7 +11,8 @@
 typedef enum {
 	HOME = 0,
 	MENU = 1,
-	GAME = 2
+	GAME = 2,
+	GAME_OVER = 3
 } SCREEN_GUI;
 
 typedef char* screen_data[8];
